@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "senzing": {
+      "command": "/Users/jbutcher/senzing-mcp/launch_senzing_mcp_ssh.sh",
+      "args": []
+    }
+  }
+}

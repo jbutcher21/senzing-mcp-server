@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "senzing": {
+      "command": "/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh",
+      "description": "Senzing Entity Resolution MCP Server - Read-only access to entity resolution data",
+      "env": {}
+    }
+  }
+}

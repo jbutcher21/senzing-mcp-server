@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "senzing": {
+      "command": "/Users/jbutcher/senzing-mcp/launch_senzing_mcp_ssh.sh",
+      "description": "Senzing Entity Resolution MCP Server (via SSH to 192.168.2.111)",
+      "env": {}
+    }
+  }
+}
