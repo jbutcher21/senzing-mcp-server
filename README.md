@@ -80,7 +80,16 @@ Or run directly:
 python -m senzing_mcp.server
 ```
 
-### Configuration for Claude Desktop
+### Configuration for AI Assistants
+
+This MCP server can be used with multiple AI assistants:
+
+- **Claude Desktop**: See installation instructions below
+- **ChatGPT Desktop**: See [CHATGPT_SETUP.md](CHATGPT_SETUP.md)
+- **Amazon Q Developer**: See [AMAZON_Q_SETUP.md](AMAZON_Q_SETUP.md)
+- **Remote Setup (Mac to Linux)**: See [MAC_SETUP_INSTRUCTIONS.md](MAC_SETUP_INSTRUCTIONS.md)
+
+#### Claude Desktop Configuration
 
 Add to your Claude Desktop MCP settings file:
 
