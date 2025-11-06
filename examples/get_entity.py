@@ -8,6 +8,11 @@ import sys
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+# Configuration: Path to senzing-mcp command
+# Default assumes it's in your PATH after running: pip install -e .
+# Or specify full path to venv: "/path/to/senzing-mcp-server/venv/bin/senzing-mcp"
+SENZING_MCP_COMMAND = os.getenv("SENZING_MCP_COMMAND", "senzing-mcp")
+
 async def get_entity(entity_id):
     """Get details for a specific entity."""
 
@@ -19,7 +24,7 @@ async def get_entity(entity_id):
         return
 
     server_params = StdioServerParameters(
-        command="/data/etl/senzing/er/v4beta/senzingMCP/venv/bin/senzing-mcp",
+        command=SENZING_MCP_COMMAND,
         env={
             "SENZING_ENGINE_CONFIGURATION_JSON": config_json,
             "LD_LIBRARY_PATH": ld_library_path

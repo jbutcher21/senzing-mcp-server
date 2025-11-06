@@ -3,26 +3,30 @@
 import asyncio
 import json
 import os
-import sys
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, Optional
 
-# Add Senzing SDK to path
-SENZING_SDK_PATH = "/data/etl/senzing/er/v4beta/sdk/python"
-if SENZING_SDK_PATH not in sys.path:
-    sys.path.insert(0, SENZING_SDK_PATH)
-
-from senzing import (
-    SzConfigManager,
-    SzDiagnostic,
-    SzEngine,
-    SzEngineFlags,
-    SzError,
-    SzNotFoundError,
-    SzProduct,
-)
-from senzing_core import SzAbstractFactoryCore
+# Import Senzing SDK modules
+# Note: Senzing environment must be initialized before running this module
+# (e.g., by sourcing setupEnv or equivalent initialization script)
+try:
+    from senzing import (
+        SzConfigManager,
+        SzDiagnostic,
+        SzEngine,
+        SzEngineFlags,
+        SzError,
+        SzNotFoundError,
+        SzProduct,
+    )
+    from senzing_core import SzAbstractFactoryCore
+except ImportError as e:
+    raise ImportError(
+        f"Failed to import Senzing SDK: {e}\n"
+        "Please ensure the Senzing environment is properly initialized.\n"
+        "This typically requires sourcing the Senzing setupEnv script before running."
+    ) from e
 
 
 class SenzingSDKWrapper:

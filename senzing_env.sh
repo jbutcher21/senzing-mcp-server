@@ -1,6 +1,17 @@
 #!/bin/bash
 # Convert Senzing INI config file to JSON environment variable
 
+#==============================================================================
+# CONFIGURATION - Edit these for your deployment
+#==============================================================================
+
+# Path to your Senzing installation (should match launch_senzing_mcp.sh)
+SENZING_ROOT="${SENZING_ROOT:-/data/etl/senzing/er/v4beta}"
+
+#==============================================================================
+# END CONFIGURATION
+#==============================================================================
+
 # Check if SENZING_CONFIG_FILE is set
 if [ -z "$SENZING_CONFIG_FILE" ]; then
     echo "Error: SENZING_CONFIG_FILE environment variable is not set" >&2
@@ -46,5 +57,5 @@ else
 fi
 
 # Set library path for Senzing native libraries
-export LD_LIBRARY_PATH="/data/etl/senzing/er/v4beta/lib:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${SENZING_ROOT}/lib:${LD_LIBRARY_PATH}"
 echo "Set LD_LIBRARY_PATH to include Senzing libraries" >&2

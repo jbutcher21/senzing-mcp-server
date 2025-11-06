@@ -37,14 +37,15 @@ This MCP server exposes Senzing SDK functionality through the Model Context Prot
 ### Prerequisites
 
 - Python 3.10 or higher
-- Senzing SDK v4beta installed at `/data/etl/senzing/er/v4beta/sdk/python`
+- Senzing SDK v4beta installed and environment initialized
 - Senzing database configured and accessible
 
 ### Setup
 
-1. Clone or navigate to the project directory:
+1. Clone the repository to your server:
 ```bash
-cd /data/etl/senzing/er/v4beta/senzingMCP
+git clone https://github.com/yourusername/senzing-mcp-server.git
+cd senzing-mcp-server
 ```
 
 2. Install the package:
@@ -52,7 +53,14 @@ cd /data/etl/senzing/er/v4beta/senzingMCP
 pip install -e .
 ```
 
-3. Configure environment variables:
+3. Configure the launch script for your deployment:
+```bash
+# Edit launch_senzing_mcp.sh and set SENZING_ROOT to your Senzing installation path
+# Example: SENZING_ROOT="/opt/senzing"
+nano launch_senzing_mcp.sh
+```
+
+4. Configure environment variables:
 ```bash
 cp .env.example .env
 # Edit .env with your Senzing configuration
@@ -147,11 +155,15 @@ The `add_records_from_file` tool expects JSONL format (one JSON object per line)
 ## Architecture
 
 ```
-senzingMCP/
+senzing-mcp-server/
 ├── src/
 │   └── senzing_mcp/
 │       ├── server.py         # MCP server with tool definitions
 │       └── sdk_wrapper.py    # Async wrapper for Senzing SDK
+├── examples/                 # Example test scripts
+├── launch_senzing_mcp.sh     # Server startup script (edit SENZING_ROOT)
+├── launch_senzing_mcp_ssh.sh # Client-side SSH launcher
+├── senzing_env.sh            # Environment setup helper
 ├── pyproject.toml            # Project configuration
 ├── .env.example              # Environment template
 └── README.md                 # This file
@@ -168,6 +180,7 @@ senzingMCP/
   - Initializes SDK from environment variables
   - Provides async interface using ThreadPoolExecutor
   - Handles error translation and bulk operations
+  - Note: Requires Senzing environment to be initialized before import
 
 ## Development
 
@@ -193,8 +206,9 @@ senzing-mcp
 - Ensure Senzing resources are accessible at specified paths
 
 **Import Path Issues**
-- Verify Senzing SDK is installed at `/data/etl/senzing/er/v4beta/sdk/python`
-- Check that the path is accessible and contains the senzing module
+- Ensure Senzing environment is initialized (source setupEnv before running)
+- Verify the Senzing SDK Python modules are in your Python path
+- Check that you can import senzing modules: `python -c "import senzing"`
 
 **Performance Issues with Bulk Import**
 - Adjust `max_workers` parameter (default: 5)

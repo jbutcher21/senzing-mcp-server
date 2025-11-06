@@ -1,0 +1,201 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Overview
+
+This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity resolution capabilities to AI assistants like Claude, ChatGPT, and Amazon Q Developer. The server wraps the synchronous Senzing Python SDK with an async interface and provides 11 tools for entity search, relationship analysis, and diagnostics.
+
+## Development Commands
+
+### Installation
+```bash
+# Clone repository to your server
+git clone https://github.com/yourusername/senzing-mcp-server.git
+cd senzing-mcp-server
+
+# Install in development mode
+pip install -e .
+
+# Configure for your deployment
+# Edit launch_senzing_mcp.sh and set SENZING_ROOT variable
+nano launch_senzing_mcp.sh
+
+# The server command becomes available after installation
+senzing-mcp
+```
+
+### Running the Server
+```bash
+# Start MCP server (uses stdio transport)
+senzing-mcp
+
+# Or run directly as module
+python -m senzing_mcp.server
+
+# With debug logging
+export SENZING_LOG_LEVEL=1
+senzing-mcp
+```
+
+### Testing Examples
+```bash
+# Test scripts are in examples/ directory
+python examples/quick_test.py              # List available tools
+python examples/search_entity.py "Name"    # Search entities
+python examples/get_entity.py 1            # Get entity by ID
+```
+
+## Architecture
+
+### Core Components
+
+**src/senzing_mcp/server.py** (server.py:1)
+- MCP server implementation using the `mcp` package
+- Defines 11 tools exposed to AI assistants
+- Tool categories:
+  - Entity search/retrieval: `search_entities`, `get_entity`
+  - Relationship analysis: `find_relationship_path`, `find_network`, `explain_relationship`, `explain_entity_resolution`
+  - Diagnostics: `get_stats`, `get_config_info`
+- Uses stdio transport for Claude Desktop integration
+- All tool calls are routed through `call_tool()` handler (server.py:172)
+
+**src/senzing_mcp/sdk_wrapper.py** (sdk_wrapper.py:1)
+- Async wrapper around synchronous Senzing SDK
+- Uses ThreadPoolExecutor for non-blocking SDK calls (sdk_wrapper.py:37)
+- Initialization from environment variables (sdk_wrapper.py:40)
+- Key pattern: All SDK methods are wrapped with `_run_async()` to execute in thread pool (sdk_wrapper.py:83)
+- Factory pattern initialization through SzAbstractFactoryCore (sdk_wrapper.py:68)
+
+### SDK Integration
+
+The Senzing SDK must be initialized in the environment before the MCP server starts. The launch scripts handle this by sourcing the Senzing setupEnv script.
+
+The SDK provides these core components (all initialized through the factory):
+- `SzEngine`: Entity operations (search, get, relationships)
+- `SzConfigManager`: Configuration management
+- `SzDiagnostic`: Statistics and diagnostics
+- `SzProduct`: Version information
+
+### Flag Management
+
+Entity operations use specific flag combinations to control detail level. The wrapper uses the same flags as `sz_explorer` for consistency:
+
+- **get_entity** (sdk_wrapper.py:99): Comprehensive entity info with relations, features, matching data
+- **search_entities** (sdk_wrapper.py:129): Base search flags, automatically enhanced with feature flags if <11 results (sdk_wrapper.py:152)
+- **why_entities** (sdk_wrapper.py:203): Includes internal features and scoring details
+- **how_entity** (sdk_wrapper.py:223): Shows resolution steps with all features
+
+### Environment Configuration
+
+Required:
+- `SENZING_ENGINE_CONFIGURATION_JSON`: JSON string with database connection and resource paths
+
+Optional:
+- `SENZING_MODULE_NAME`: Module identifier (default: "senzing-mcp")
+- `SENZING_INSTANCE_NAME`: Instance name (default: "senzing-mcp-server")
+- `SENZING_LOG_LEVEL`: Verbosity (default: 0)
+
+Example configuration from .env.example:
+```json
+{
+  "PIPELINE": {
+    "CONFIGPATH": "/etc/opt/senzing",
+    "RESOURCEPATH": "/opt/senzing/g2/resources",
+    "SUPPORTPATH": "/opt/senzing/data"
+  },
+  "SQL": {
+    "CONNECTION": "sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db"
+  }
+}
+```
+
+## Key Patterns
+
+### Async Wrapper Pattern
+All SDK operations follow this pattern:
+1. Check initialization state (sdk_wrapper.py:85)
+2. Run sync SDK call in ThreadPoolExecutor via `_run_async()` (sdk_wrapper.py:89)
+3. Return result or catch SzError and return JSON error (e.g., sdk_wrapper.py:119)
+
+### Tool Handler Pattern
+Server tool handlers (server.py:172):
+1. Ensure SDK is initialized (server.py:176)
+2. Extract arguments from tool call
+3. Transform arguments to SDK format (e.g., JSON strings for entity lists)
+4. Call async wrapper method
+5. Return TextContent with result or error
+
+### Initialization Flow
+1. Server starts via `run()` entry point (server.py:274)
+2. `main()` calls `sdk_wrapper.initialize()` (server.py:251)
+3. Wrapper loads config from env vars and initializes factory (sdk_wrapper.py:46)
+4. Factory creates all SDK components (sdk_wrapper.py:75-78)
+5. Server starts stdio transport and runs MCP protocol (server.py:255)
+
+## Deployment Guide
+
+### Portable Configuration
+
+The codebase is designed to be portable across different servers. Each deployment requires editing configuration variables:
+
+**Server-side (where Senzing is installed):**
+1. Clone the repository
+2. Run `pip install -e .`
+3. Edit `launch_senzing_mcp.sh` - set `SENZING_ROOT` to your Senzing installation path
+4. Optionally edit `senzing_env.sh` if SENZING_ROOT differs
+
+**Client-side (for remote deployments):**
+1. Copy `launch_senzing_mcp_ssh.sh` to your client machine
+2. Edit configuration section: set remote host, user, SSH key, and path to server-side launch script
+3. Update AI assistant's MCP config to point to the SSH launcher
+
+### How MCP Servers Work
+
+The AI assistant spawns the MCP server as a subprocess for each session:
+- **Local**: AI runs `senzing-mcp` directly as a child process
+- **Remote**: AI runs the SSH script, which connects and starts the server remotely
+- Communication happens via stdio (stdin/stdout) using JSON-RPC
+- The server terminates when the AI session ends
+
+This means the launch script must initialize the complete environment on every invocation.
+
+## AI Assistant Integration
+
+The MCP server is designed to be called by AI assistants through their MCP client implementations:
+
+- **Claude Desktop**: Add to `claude_desktop_config.json` with command `senzing-mcp` (local) or path to SSH launcher (remote)
+- **ChatGPT Desktop**: Uses `chatgpt_mcp_config.json` with similar configuration
+- **Amazon Q Developer**: See AMAZON_Q_SETUP.md for VS Code extension setup
+- **Remote Setup**: SSH tunneling approach documented in MAC_SETUP_INSTRUCTIONS.md
+
+Configuration files in repo root show example setups for each platform.
+
+## Project Structure
+
+```
+senzing-mcp-server/
+├── src/senzing_mcp/
+│   ├── server.py          # MCP server with 11 tool definitions
+│   ├── sdk_wrapper.py     # Async Senzing SDK wrapper
+│   └── __init__.py
+├── examples/              # Test scripts using MCP client
+│   ├── quick_test.py      # List available tools
+│   ├── search_entity.py   # Search example
+│   └── get_entity.py      # Get entity example
+├── pyproject.toml         # Python package config
+├── .env.example           # Environment template
+└── *.md                   # Setup docs for different platforms
+```
+
+## Common Issues
+
+**SDK Import Errors**: Ensure Senzing environment is initialized before starting the MCP server. The launch script should source setupEnv before running `senzing-mcp`.
+
+**Path Configuration**: Edit `launch_senzing_mcp.sh` and set the `SENZING_ROOT` variable to match your Senzing installation location (where setupEnv is located).
+
+**Initialization Failures**: Check `SENZING_ENGINE_CONFIGURATION_JSON` is valid JSON with correct paths and database connection.
+
+**Async Errors**: The SDK is synchronous but wrapped in async - ensure all SDK calls go through `_run_async()` method.
+
+**Tool Call Failures**: Server logs errors but returns them as JSON - check stderr for detailed exception info.
