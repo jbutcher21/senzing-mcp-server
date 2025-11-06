@@ -119,7 +119,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="explain_relationship",
-            description="Explain why two entities are related or resolved together. Shows the matching attributes and scoring details.",
+            description="Explain why two entities are related or resolved together (WHY analysis). Returns matching attributes, conflicts, and scoring details. For presentation guidelines, see RESPONSE_FORMATTING.md.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -137,7 +137,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="explain_entity_resolution",
-            description="Explain how an entity was resolved from its source records. Shows the resolution steps and decisions.",
+            description="Explain how an entity was resolved from its source records (HOW analysis). Shows the step-by-step resolution process, merge decisions, and match drivers. For presentation guidelines, see RESPONSE_FORMATTING.md.",
             inputSchema={
                 "type": "object",
                 "properties": {

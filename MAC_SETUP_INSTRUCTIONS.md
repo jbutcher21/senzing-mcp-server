@@ -139,9 +139,9 @@ ssh-add -l
 
 1. Check ChatGPT logs (if available)
 2. Test SSH connection manually
-3. Verify the remote Senzing environment is set up correctly:
+3. Verify the remote Senzing environment is set up correctly in .bashrc:
    ```bash
-   ssh jbutcher@192.168.2.111 "source /data/etl/senzing/er/v4beta/setupEnv && echo \$SENZING_ENGINE_CONFIGURATION_JSON"
+   ssh jbutcher@192.168.2.111 "echo \$SENZING_ENGINE_CONFIGURATION_JSON"
    ```
 
 ### Slow Response Times
@@ -175,6 +175,28 @@ Once configured, ChatGPT can use these Senzing tools:
 - "Find the network of entities related to entity 20"
 - "What are the Senzing statistics?"
 
+## Response Formatting for HOW/WHY Analysis
+
+For better formatted explanations of entity resolution, you can provide ChatGPT with formatting instructions:
+
+**Option 1: Add to Custom Instructions**
+1. Go to ChatGPT Settings → Personalization → Custom Instructions
+2. Copy the contents of `RESPONSE_FORMATTING.md` from the senzing-mcp-server repository
+3. Paste into "How would you like ChatGPT to respond?"
+4. ChatGPT will automatically format all Senzing HOW/WHY results
+
+**Option 2: Include in Conversation**
+When asking about entity resolution:
+```
+Please format the results according to RESPONSE_FORMATTING.md
+```
+Then provide the contents from the repository.
+
+**Result:**
+Clear summaries with step-by-step breakdowns, highlighted confirmations (✅) and denials (❌), and side-by-side comparisons instead of raw JSON.
+
+See the main README's "Response Formatting Guide" section for details and examples.
+
 ## Security Notes
 
 - The SSH connection uses key-based authentication (more secure than passwords)
@@ -191,4 +213,4 @@ Once configured, ChatGPT can use these Senzing tools:
 **On remote server (192.168.2.111):**
 - Remote launch script: `/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh`
 - MCP server: `/data/etl/senzing/er/v4beta/senzingMCP/venv/bin/senzing-mcp`
-- Environment setup: `/data/etl/senzing/er/v4beta/setupEnv`
+- Environment setup: Senzing environment variables in `~/.bashrc`

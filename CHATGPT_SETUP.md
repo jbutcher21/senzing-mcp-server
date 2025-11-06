@@ -77,6 +77,28 @@ The Senzing MCP server provides 8 read-only tools:
 - "Explain why entity 1 and entity 8 are related"
 - "Find the network of entities related to entity 1"
 
+## Response Formatting for HOW/WHY Analysis
+
+For better formatted explanations of entity resolution, you can provide ChatGPT with formatting instructions:
+
+**Option 1: Add to Custom Instructions**
+1. Go to ChatGPT Settings → Personalization → Custom Instructions
+2. Copy the contents of `RESPONSE_FORMATTING.md` from the repository
+3. Paste into "How would you like ChatGPT to respond?"
+4. ChatGPT will automatically format all Senzing HOW/WHY results
+
+**Option 2: Include in Conversation**
+When asking about entity resolution, add:
+```
+Please format the results according to RESPONSE_FORMATTING.md
+```
+Then paste the contents of the formatting guide or upload the file.
+
+**Result:**
+Instead of raw JSON, you'll get clear summaries with step-by-step breakdowns, highlighted confirmations (✅) and denials (❌), and side-by-side comparisons.
+
+See the main README's "Response Formatting Guide" section for more details and examples.
+
 ## Troubleshooting
 
 ### MCP Server Not Appearing
@@ -91,16 +113,15 @@ The Senzing MCP server provides 8 read-only tools:
    ```bash
    /data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh
    ```
-2. Verify environment variables are set:
+2. Verify environment variables are set in your .bashrc:
    ```bash
-   source /data/etl/senzing/er/v4beta/setupEnv
    echo $SENZING_ENGINE_CONFIGURATION_JSON
    ```
 
 ### No Data Returned
 
 1. Verify the Senzing database has data
-2. Check that setupEnv script properly configured the database path
+2. Check that your .bashrc properly sets SENZING_ENGINE_CONFIGURATION_JSON with the correct database path
 3. Review logs in ChatGPT application
 
 ## Notes

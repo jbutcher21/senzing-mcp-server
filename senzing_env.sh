@@ -1,16 +1,12 @@
 #!/bin/bash
-# Convert Senzing INI config file to JSON environment variable
-
-#==============================================================================
-# CONFIGURATION - Edit these for your deployment
-#==============================================================================
-
-# Path to your Senzing installation (should match launch_senzing_mcp.sh)
-SENZING_ROOT="${SENZING_ROOT:-/data/etl/senzing/er/v4beta}"
-
-#==============================================================================
-# END CONFIGURATION
-#==============================================================================
+# OPTIONAL: Convert Senzing INI config file to JSON environment variable
+#
+# This script is NO LONGER REQUIRED if you set SENZING_ENGINE_CONFIGURATION_JSON
+# in your .bashrc. It's kept as a utility for users who need to convert INI files.
+#
+# USAGE:
+#   export SENZING_CONFIG_FILE=/path/to/config.ini
+#   source ./senzing_env.sh
 
 # Check if SENZING_CONFIG_FILE is set
 if [ -z "$SENZING_CONFIG_FILE" ]; then
@@ -55,7 +51,3 @@ else
     echo "Error: Failed to convert INI to JSON" >&2
     exit 1
 fi
-
-# Set library path for Senzing native libraries
-export LD_LIBRARY_PATH="${SENZING_ROOT}/lib:${LD_LIBRARY_PATH}"
-echo "Set LD_LIBRARY_PATH to include Senzing libraries" >&2

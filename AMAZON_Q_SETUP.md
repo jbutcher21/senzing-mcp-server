@@ -38,8 +38,7 @@ nano launch_senzing_mcp.sh
 # Test that senzing-mcp command is available
 which senzing-mcp
 
-# Verify Senzing environment
-source /path/to/your/senzing/setupEnv
+# Verify Senzing environment (should be in your .bashrc)
 python -c "import senzing; print('Senzing SDK accessible')"
 ```
 
@@ -121,7 +120,7 @@ EOF
 }
 ```
 
-**Note**: The `launch_senzing_mcp.sh` script automatically sets up the required environment variables by sourcing Senzing's setupEnv.
+**Note**: The `launch_senzing_mcp.sh` script sources your .bashrc to get the required Senzing environment variables.
 
 #### 2. Reload Amazon Q Developer
 
@@ -310,6 +309,26 @@ Once configured, you can ask Amazon Q Developer:
 "How many entities are in the repository?"
 ```
 
+## Response Formatting for HOW/WHY Analysis
+
+Amazon Q Developer can provide better formatted explanations of entity resolution if you reference the formatting guide:
+
+**Include in your workspace:**
+1. Ensure `RESPONSE_FORMATTING.md` is in your project directory
+2. When asking about entity resolution, use `@workspace`:
+
+```
+@workspace Please explain how entity 100 was resolved, using the formatting from RESPONSE_FORMATTING.md
+```
+
+```
+@workspace Why are entities 100 and 200 related? Format according to RESPONSE_FORMATTING.md
+```
+
+Amazon Q will then format the HOW/WHY results with clear summaries, step-by-step breakdowns, and highlighted confirmations/denials instead of showing raw JSON.
+
+See the main README's "Response Formatting Guide" section for more details and examples.
+
 ## Troubleshooting
 
 ### MCP Server Not Appearing
@@ -348,17 +367,16 @@ Once configured, you can ask Amazon Q Developer:
 
 2. **Verify Environment Setup**
    ```bash
-   # Check that launch_senzing_mcp.sh has correct SENZING_ROOT
-   grep SENZING_ROOT /path/to/senzing-mcp-server/launch_senzing_mcp.sh
+   # Check that Senzing environment variables are set in .bashrc
+   grep SENZING_ENGINE_CONFIGURATION_JSON ~/.bashrc
 
-   # Test that setupEnv exists at that location
-   ls -la /your/senzing/root/setupEnv
+   # Verify environment is loaded
+   echo $SENZING_ENGINE_CONFIGURATION_JSON
    ```
 
 3. **Check Senzing SDK Access**
    ```bash
-   # The SDK should be importable after setupEnv is sourced
-   source /your/senzing/root/setupEnv
+   # The SDK should be importable (ensure .bashrc is sourced)
    python3 -c "from senzing import SzEngine; print('Senzing SDK accessible')"
    ```
 
@@ -369,9 +387,7 @@ Once configured, you can ask Amazon Q Developer:
    # Navigate to your MCP server directory
    cd /path/to/senzing-mcp-server
 
-   # Run test search using example script
-   source /your/senzing/root/setupEnv
-   source ./senzing_env.sh
+   # Run test search using example script (ensure .bashrc is sourced)
    python examples/search_entity.py "Smith"
    ```
 

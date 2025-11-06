@@ -1,13 +1,24 @@
 #!/bin/bash
 # Launch script for Senzing MCP Server
 # This script sets up the environment and starts the MCP server
+#
+# USAGE:
+# - LOCAL: Point your AI assistant's MCP config directly to this script
+# - REMOTE: Called by launch_senzing_mcp_ssh.sh via SSH
+#
+# PREREQUISITES:
+# Your .bashrc must initialize Senzing with:
+# - SENZING_ENGINE_CONFIGURATION_JSON environment variable (required)
+# - LD_LIBRARY_PATH including Senzing libraries
+# - PYTHONPATH including Senzing Python SDK
 
 #==============================================================================
 # CONFIGURATION - Edit these for your deployment
 #==============================================================================
 
-# Path to your Senzing installation (where setupEnv is located)
-SENZING_ROOT="/data/etl/senzing/er/v4beta"
+# Path to this project's virtual environment
+# (Edit if your venv is in a different location)
+VENV_PATH="./venv/bin/senzing-mcp"
 
 #==============================================================================
 # END CONFIGURATION
@@ -15,24 +26,25 @@ SENZING_ROOT="/data/etl/senzing/er/v4beta"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Validate that SENZING_ROOT is set and exists
-if [ -z "$SENZING_ROOT" ]; then
-    echo "Error: SENZING_ROOT is not set" >&2
-    exit 1
-fi
-
-if [ ! -f "$SENZING_ROOT/setupEnv" ]; then
-    echo "Error: setupEnv not found at $SENZING_ROOT/setupEnv" >&2
-    exit 1
-fi
-
-# Source the main Senzing environment setup
-source "$SENZING_ROOT/setupEnv"
-
-# Source the local senzing environment configuration (for INI to JSON conversion)
 cd "$SCRIPT_DIR"
-source ./senzing_env.sh
+
+# Source .bashrc to get Senzing environment variables
+# This ensures the interactive shell initialization runs
+source "$HOME/.bashrc"
+
+# Validate that required Senzing environment variables are set
+if [ -z "$SENZING_ENGINE_CONFIGURATION_JSON" ]; then
+    echo "Error: SENZING_ENGINE_CONFIGURATION_JSON is not set" >&2
+    echo "Please add Senzing initialization to your .bashrc file" >&2
+    exit 1
+fi
+
+# Check if venv exists
+if [ ! -f "$VENV_PATH" ]; then
+    echo "Error: Virtual environment not found at $VENV_PATH" >&2
+    echo "Please run: pip install -e ." >&2
+    exit 1
+fi
 
 # Launch the MCP server from the virtual environment
-exec ./venv/bin/senzing-mcp
+exec "$VENV_PATH"

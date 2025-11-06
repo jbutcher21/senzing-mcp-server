@@ -6,27 +6,24 @@ Model Context Protocol (MCP) server for the Senzing SDK, providing entity resolu
 
 This MCP server exposes Senzing SDK functionality through the Model Context Protocol, enabling AI assistants like Claude to:
 - Search for entities by attributes
-- Add and manage entity records
+- Retrieve detailed entity information
 - Analyze relationships and networks
-- Explain entity resolution decisions
-- Perform bulk data imports with multithreading
+- Explain entity resolution decisions (HOW and WHY analysis)
+- View engine statistics and configuration
 
 ## Features
+
+This is a **read-only** MCP server providing 8 tools for entity resolution analysis:
 
 ### Entity Search & Retrieval
 - **search_entities**: Search by name, address, phone, email, etc.
 - **get_entity**: Retrieve detailed entity information by ID
 
-### Record Management
-- **add_record**: Add single entity records
-- **add_records_from_file**: Bulk import from JSONL files with multithreading
-- **delete_record**: Remove records from the repository
-
 ### Relationship Analysis
 - **find_relationship_path**: Discover paths between entities
 - **find_network**: Analyze networks of related entities
-- **explain_relationship**: Understand why entities are related
-- **explain_entity_resolution**: See how entities were resolved
+- **explain_relationship**: Understand why entities are related (WHY analysis)
+- **explain_entity_resolution**: See how entities were resolved (HOW analysis)
 
 ### Configuration & Diagnostics
 - **get_stats**: View engine statistics and metrics
@@ -142,6 +139,71 @@ Import records from /path/to/customers.jsonl into the CUSTOMERS data source
 Explain why entities 100 and 200 are related
 ```
 
+## Response Formatting Guide
+
+For better interpretation of HOW and WHY analysis results, this repository includes a **Response Formatting Guide** (`RESPONSE_FORMATTING.md`) that helps AI assistants present entity resolution explanations in a clear, professional format.
+
+### What It Does
+
+The formatting guide provides instructions for:
+- **HOW Analysis** (`explain_entity_resolution`): Step-by-step entity resolution explanations with merge steps and match drivers
+- **WHY Analysis** (`explain_relationship`): Side-by-side entity comparisons showing confirmations and conflicts
+
+### How to Use with Your AI Assistant
+
+The MCP server returns raw JSON data. To get nicely formatted explanations, provide the formatting guide to your AI assistant:
+
+#### Option 1: Include in Conversation (All AI Assistants)
+
+When asking about entity resolution, add:
+```
+Please format the results according to the guidelines in RESPONSE_FORMATTING.md
+```
+
+Then paste the contents of `RESPONSE_FORMATTING.md` or provide it as an uploaded file.
+
+#### Option 2: Add to Project Instructions (Claude Desktop/Projects)
+
+1. Open your Claude project or conversation
+2. Add `RESPONSE_FORMATTING.md` to project knowledge
+3. Claude will automatically apply formatting rules to all HOW/WHY results
+
+#### Option 3: Custom Instructions (ChatGPT/Other AI)
+
+1. Copy the content from `RESPONSE_FORMATTING.md`
+2. Add to your AI assistant's custom instructions or system prompt
+3. The AI will automatically format Senzing results
+
+#### Option 4: For Amazon Q Developer
+
+1. Include `RESPONSE_FORMATTING.md` in your workspace
+2. Reference it when asking about entity resolution:
+   ```
+   @workspace Please explain how entity 100 was resolved, using the formatting from RESPONSE_FORMATTING.md
+   ```
+
+### Example: Before vs After Formatting
+
+**Without formatting guide:**
+```json
+{"HOW_RESULTS":{"RESOLUTION_STEPS":[{"STEP":1,"VIRTUAL_ENTITY_1":...}]}
+```
+
+**With formatting guide:**
+```
+## Summary
+Entity 1234 was resolved from 4 CUSTOMERS records through 3 merge steps.
+Primary match drivers: Email address and phone number matches.
+
+## Resolution Steps
+Step 1: Merged CUSTOMERS:1001 with CUSTOMERS:1002
+- ✅ EMAIL: user@example.com (Score: 95)
+- ✅ PHONE: +1-555-0100 (Score: 90)
+...
+```
+
+See `RESPONSE_FORMATTING.md` for complete formatting examples and guidelines.
+
 ## File Format for Bulk Import
 
 The `add_records_from_file` tool expects JSONL format (one JSON object per line):
@@ -206,7 +268,7 @@ senzing-mcp
 - Ensure Senzing resources are accessible at specified paths
 
 **Import Path Issues**
-- Ensure Senzing environment is initialized (source setupEnv before running)
+- Ensure Senzing environment is initialized in your .bashrc file
 - Verify the Senzing SDK Python modules are in your Python path
 - Check that you can import senzing modules: `python -c "import senzing"`
 

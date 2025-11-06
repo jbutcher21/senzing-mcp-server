@@ -4,6 +4,10 @@
 # PURPOSE: This script runs on your MCP CLIENT (Mac/Windows) and connects to
 #          a remote Senzing server via SSH to start the MCP server there.
 #
+# PREREQUISITES:
+#          - Remote server must have Senzing initialization in .bashrc
+#          - Remote server must have senzing-mcp-server installed
+#
 # SETUP:   1. Copy this script to your client machine
 #          2. Edit the configuration section below
 #          3. Make it executable: chmod +x launch_senzing_mcp_ssh.sh

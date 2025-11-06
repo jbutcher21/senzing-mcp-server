@@ -12,10 +12,12 @@ Before running these examples, ensure:
    pip install -e .
    ```
 
-2. Environment is configured:
+2. Senzing environment is configured in your .bashrc:
    ```bash
-   source /data/etl/senzing/er/v4beta/setupEnv
-   source ./senzing_env.sh
+   # Ensure your .bashrc has:
+   # - SENZING_ENGINE_CONFIGURATION_JSON
+   # - LD_LIBRARY_PATH including Senzing libraries
+   # - PYTHONPATH including Senzing Python SDK
    ```
 
 ## Available Examples
@@ -160,9 +162,8 @@ pip install mcp
 
 **Environment errors:**
 ```bash
-# Source environment setup
-source /data/etl/senzing/er/v4beta/setupEnv
-source /data/etl/senzing/er/v4beta/senzingMCP/senzing_env.sh
+# Ensure your .bashrc has Senzing environment variables set
+echo $SENZING_ENGINE_CONFIGURATION_JSON
 ```
 
 ## Notes
