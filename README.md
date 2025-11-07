@@ -45,17 +45,14 @@ git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
 ```
 
-2. Install the package:
-```bash
-pip install -e .
-```
-
-3. Configure the launch script for your deployment:
+2. Configure the launch script for your deployment:
 ```bash
 # Edit launch_senzing_mcp.sh and set SENZING_ROOT to your Senzing installation path
 # Example: SENZING_ROOT="/opt/senzing"
 nano launch_senzing_mcp.sh
 ```
+
+**Note**: No pip install required - the launch script runs directly from source.
 
 4. Configure environment variables:
 ```bash
@@ -75,14 +72,20 @@ Optional environment variables:
 
 ### Running the Server
 
-Start the MCP server:
+Start the MCP server using the launch script:
 ```bash
-senzing-mcp
+./launch_senzing_mcp.sh
 ```
 
-Or run directly:
+Or run directly from source:
 ```bash
+cd src
 python -m senzing_mcp.server
+```
+
+Or if installed via pip:
+```bash
+senzing-mcp
 ```
 
 ### Configuration for AI Assistants

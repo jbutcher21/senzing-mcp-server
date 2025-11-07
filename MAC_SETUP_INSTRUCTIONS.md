@@ -212,5 +212,7 @@ See the main README's "Response Formatting Guide" section for details and exampl
 
 **On remote server (192.168.2.111):**
 - Remote launch script: `/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh`
-- MCP server: `/data/etl/senzing/er/v4beta/senzingMCP/venv/bin/senzing-mcp`
+- MCP server source: `/data/etl/senzing/er/v4beta/senzingMCP/src/senzing_mcp/server.py`
 - Environment setup: Senzing environment variables in `~/.bashrc`
+
+**Note**: The launch script now runs the MCP server directly from source without requiring pip installation.

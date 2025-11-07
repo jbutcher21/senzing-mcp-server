@@ -16,9 +16,9 @@
 # CONFIGURATION - Edit these for your deployment
 #==============================================================================
 
-# Path to this project's virtual environment
-# (Edit if your venv is in a different location)
-VENV_PATH="./venv/bin/senzing-mcp"
+# Path to the Python module
+# Run directly from source without requiring pip install
+PYTHON_MODULE="src/senzing_mcp/server.py"
 
 #==============================================================================
 # END CONFIGURATION
@@ -39,12 +39,13 @@ if [ -z "$SENZING_ENGINE_CONFIGURATION_JSON" ]; then
     exit 1
 fi
 
-# Check if venv exists
-if [ ! -f "$VENV_PATH" ]; then
-    echo "Error: Virtual environment not found at $VENV_PATH" >&2
-    echo "Please run: pip install -e ." >&2
+# Check if the Python module exists
+if [ ! -f "$PYTHON_MODULE" ]; then
+    echo "Error: Python module not found at $PYTHON_MODULE" >&2
     exit 1
 fi
 
-# Launch the MCP server from the virtual environment
-exec "$VENV_PATH"
+# Add src directory to Python path and launch the MCP server as module
+export PYTHONPATH="$SCRIPT_DIR/src:$PYTHONPATH"
+cd "$SCRIPT_DIR/src"
+exec python3 -m senzing_mcp.server

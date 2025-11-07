@@ -10,7 +10,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
-from .sdk_wrapper import SenzingSDKWrapper
+from senzing_mcp.sdk_wrapper import SenzingSDKWrapper
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

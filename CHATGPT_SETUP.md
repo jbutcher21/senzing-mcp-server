@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - ChatGPT Desktop App installed (with MCP support)
-- Senzing MCP server installed in `/data/etl/senzing/er/v4beta/senzingMCP/`
+- Senzing MCP server cloned and configured in `/data/etl/senzing/er/v4beta/senzingMCP/`
 
 ## Installation Steps
 
@@ -41,6 +41,8 @@ mkdir -p ~/Library/Application\ Support/ChatGPT/
 cp /data/etl/senzing/er/v4beta/senzingMCP/chatgpt_mcp_config.json \
    ~/Library/Application\ Support/ChatGPT/mcp_config.json
 ```
+
+**Note**: The launch script now runs directly from source without requiring pip installation.
 
 ### 3. Restart ChatGPT Desktop
 

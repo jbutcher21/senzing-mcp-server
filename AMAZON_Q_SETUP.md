@@ -16,15 +16,12 @@ Amazon Q Developer supports MCP (Model Context Protocol) servers, allowing you t
 
 ### Install the MCP Server
 
-First, install the Senzing MCP server on your AWS instance:
+First, set up the Senzing MCP server on your AWS instance:
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
-
-# Install in development mode
-pip install -e .
 
 # Configure for your deployment
 # Edit launch_senzing_mcp.sh and set SENZING_ROOT to your Senzing installation path
@@ -32,11 +29,13 @@ nano launch_senzing_mcp.sh
 # Set: SENZING_ROOT="/path/to/your/senzing"
 ```
 
-### Verify Installation
+**Note**: No pip install required - the launch script runs directly from source.
+
+### Verify Setup
 
 ```bash
-# Test that senzing-mcp command is available
-which senzing-mcp
+# Test the launch script
+./launch_senzing_mcp.sh --help
 
 # Verify Senzing environment (should be in your .bashrc)
 python -c "import senzing; print('Senzing SDK accessible')"
@@ -46,7 +45,7 @@ python -c "import senzing; print('Senzing SDK accessible')"
 
 If you're using **AWS Code Server** (browser-based VS Code), follow these steps:
 
-1. **Install the MCP server** on your Code Server instance (see Installation section above)
+1. **Set up the MCP server** on your Code Server instance (see Installation section above)
 
 2. **Create MCP configuration:**
    ```bash
@@ -56,15 +55,15 @@ If you're using **AWS Code Server** (browser-based VS Code), follow these steps:
 
    Add this content (adjust path to where you cloned the repo):
    ```json
-   {
-     "mcpServers": {
-       "senzing": {
-         "command": "/home/ec2-user/senzing-mcp-server/launch_senzing_mcp.sh",
-         "args": [],
-         "env": {}
-       }
-     }
+{
+   "mcpServers": {
+      "senzing": {
+      "command": "/home/ec2-user/senzing-mcp-server/launch_senzing_mcp.sh",
+      "args": [],
+      "env": {}
+      }
    }
+}
    ```
 
 3. **Reload Amazon Q Developer:**
