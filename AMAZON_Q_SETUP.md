@@ -244,37 +244,35 @@ After setup and reloading Amazon Q Developer, verify the MCP server is connected
 
 ## Available Tools
 
-The Senzing MCP server provides 8 read-only tools:
+The Senzing MCP server provides 7 read-only tools:
 
-1. **search_entities** - Search for entities by attributes
+1. **search** - Search for entities by attributes
    - Parameters: name, address, phone, email, date of birth
    - Returns: List of matching entities with match scores
 
-2. **get_entity** - Get full entity details by ID
-   - Parameters: entity_id
+2. **get_entity** - Get full entity details by entity ID
+   - Parameters: entity_id (Senzing's internal identifier)
    - Returns: Complete entity record with features, records, and relationships
 
-3. **find_relationship_path** - Find connection between entities
+3. **get_source_record** - Look up entity by source record ID
+   - Parameters: data_source (e.g., "CUSTOMERS"), record_id (e.g., "1001")
+   - Returns: Entity details for the entity containing this source record
+
+4. **find_relationship_path** - Find connection between entities
    - Parameters: start_entity_id, end_entity_id, max_degrees
    - Returns: Shortest path and relationship details
 
-4. **find_network** - Discover related entity networks
-   - Parameters: entity_ids, max_degrees, build_out_degrees, max_entities
+5. **expand_entity_network** - Expand network of related entities to (n) degrees (max 3)
+   - Parameters: entity_ids, max_degrees (default: 2, max: 3), build_out_degrees, max_entities
    - Returns: Network graph of related entities
 
-5. **explain_relationship** - Explain why entities are related
+6. **explain_why_entities_related** - Explain why two entities are related (WHY analysis)
    - Parameters: entity_id_1, entity_id_2
    - Returns: Detailed match analysis and feature comparison
 
-6. **explain_entity_resolution** - Explain how entity was resolved
+7. **how_entity_resolved** - Explain how entity was resolved (HOW analysis)
    - Parameters: entity_id
    - Returns: Resolution steps and record consolidation details
-
-7. **get_stats** - Get Senzing engine statistics
-   - Returns: Performance metrics and repository statistics
-
-8. **get_config_info** - Get configuration information
-   - Returns: Active config ID and version details
 
 ## Example Queries for Amazon Q
 

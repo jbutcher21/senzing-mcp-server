@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity resolution capabilities to AI assistants like Claude, ChatGPT, and Amazon Q Developer. The server wraps the synchronous Senzing Python SDK with an async interface and provides 8 read-only tools for entity search, relationship analysis, and diagnostics.
+This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity resolution capabilities to AI assistants like Claude, ChatGPT, and Amazon Q Developer. The server wraps the synchronous Senzing Python SDK with an async interface and provides 7 read-only tools for entity search and relationship analysis.
 
-**Important**: When interpreting HOW and WHY results from `explain_entity_resolution` and `explain_relationship` tools, follow the formatting guidelines in `RESPONSE_FORMATTING.md` for clear, professional presentation of entity resolution explanations.
+**Key Concepts:**
+- **Entity ID**: Senzing's internal identifier (small integers like 1, 2, 3...) assigned after entity resolution
+- **Record ID**: Your source system's identifier (like "1001", "1002") in a specific data source (like "CUSTOMERS")
+- Most tools require Entity IDs. Use `search` or `get_source_record` to find Entity IDs first.
+
+**Important**: When interpreting HOW and WHY results from `how_entity_resolved` and `explain_why_entities_related` tools, follow the formatting guidelines in `RESPONSE_FORMATTING.md` for clear, professional presentation of entity resolution explanations.
 
 ## Development Commands
 
@@ -55,11 +60,10 @@ python examples/get_entity.py 1            # Get entity by ID
 
 **src/senzing_mcp/server.py** (server.py:1)
 - MCP server implementation using the `mcp` package
-- Defines 8 read-only tools exposed to AI assistants
+- Defines 7 read-only tools exposed to AI assistants
 - Tool categories:
-  - Entity search/retrieval: `search_entities`, `get_entity`
-  - Relationship analysis: `find_relationship_path`, `find_network`, `explain_relationship`, `explain_entity_resolution`
-  - Diagnostics: `get_stats`, `get_config_info`
+  - Entity search/retrieval: `search`, `get_entity`, `get_source_record`
+  - Relationship analysis: `find_relationship_path`, `expand_entity_network`, `explain_why_entities_related`, `how_entity_resolved`
 - Uses stdio transport for Claude Desktop integration
 - All tool calls are routed through `call_tool()` handler
 
@@ -74,11 +78,8 @@ python examples/get_entity.py 1            # Get entity by ID
 
 The Senzing SDK must be initialized in the environment before the MCP server starts. The launch scripts handle this by sourcing the user's .bashrc file, which should contain Senzing initialization.
 
-The SDK provides these core components (all initialized through the factory):
-- `SzEngine`: Entity operations (search, get, relationships)
-- `SzConfigManager`: Configuration management
-- `SzDiagnostic`: Statistics and diagnostics
-- `SzProduct`: Version information
+The SDK provides the core component initialized through the factory:
+- `SzEngine`: Entity operations (search, get, relationships, explanations)
 
 ### Flag Management
 

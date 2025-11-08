@@ -12,13 +12,10 @@ from typing import Any, Optional
 # (e.g., by sourcing setupEnv or equivalent initialization script)
 try:
     from senzing import (
-        SzConfigManager,
-        SzDiagnostic,
         SzEngine,
         SzEngineFlags,
         SzError,
         SzNotFoundError,
-        SzProduct,
     )
     from senzing_core import SzAbstractFactoryCore
 except ImportError as e:
@@ -35,9 +32,6 @@ class SenzingSDKWrapper:
     def __init__(self):
         self.factory: Optional[SzAbstractFactoryCore] = None
         self.engine: Optional[SzEngine] = None
-        self.config_manager: Optional[SzConfigManager] = None
-        self.diagnostic: Optional[SzDiagnostic] = None
-        self.product: Optional[SzProduct] = None
         self.executor = ThreadPoolExecutor(max_workers=10)
         self._initialized = False
 
@@ -75,11 +69,8 @@ class SenzingSDKWrapper:
                 verbose_logging=verbose_logging
             )
 
-            # Create components (already initialized through factory)
+            # Create engine component (already initialized through factory)
             self.engine = self.factory.create_engine()
-            self.config_manager = self.factory.create_configmanager()
-            self.diagnostic = self.factory.create_diagnostic()
-            self.product = self.factory.create_product()
 
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Senzing SDK: {str(e)}")
@@ -95,6 +86,33 @@ class SenzingSDKWrapper:
         )
 
     # Entity Operations
+
+    async def get_entity_by_record_id(self, data_source: str, record_id: str, flags: int = None) -> str:
+        """Get entity details by data source and record ID (same flags as sz_explorer)."""
+        try:
+            # Use the same comprehensive flags as get_entity_by_entity_id
+            if flags is None:
+                flags = (
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_ENTITY_NAME |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_DATA |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_MATCHING_INFO |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_ALL_RELATIONS |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_ENTITY_NAME |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_MATCHING_INFO |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_RECORD_SUMMARY |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_FEATURES |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_ALL_FEATURES |
+                    SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_UNMAPPED_DATA
+                )
+
+            result = await self._run_async(
+                self.engine.get_entity_by_record_id, data_source, record_id, flags
+            )
+            return result
+        except SzNotFoundError:
+            return json.dumps({"error": "Record not found", "data_source": data_source, "record_id": record_id})
+        except SzError as e:
+            return json.dumps({"error": str(e)})
 
     async def get_entity_by_entity_id(self, entity_id: int, flags: int = None) -> str:
         """Get entity details by entity ID with comprehensive information (same flags as sz_explorer)."""
@@ -239,32 +257,6 @@ class SenzingSDKWrapper:
                 self.engine.how_entity_by_entity_id, entity_id, flags
             )
             return result
-        except SzError as e:
-            return json.dumps({"error": str(e)})
-
-    # Configuration and Diagnostics
-
-    async def get_stats(self) -> str:
-        """Get Senzing statistics and diagnostics."""
-        try:
-            stats = await self._run_async(self.engine.get_stats)
-            return stats
-        except SzError as e:
-            return json.dumps({"error": str(e)})
-
-    async def get_active_config_id(self) -> str:
-        """Get the active configuration ID."""
-        try:
-            config_id = await self._run_async(self.config_manager.get_default_config_id)
-            return json.dumps({"active_config_id": config_id})
-        except SzError as e:
-            return json.dumps({"error": str(e)})
-
-    async def get_version(self) -> str:
-        """Get Senzing product version."""
-        try:
-            version = await self._run_async(self.product.get_version)
-            return json.dumps({"version": version})
         except SzError as e:
             return json.dumps({"error": str(e)})
 

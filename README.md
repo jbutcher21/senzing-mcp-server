@@ -9,25 +9,21 @@ This MCP server exposes Senzing SDK functionality through the Model Context Prot
 - Retrieve detailed entity information
 - Analyze relationships and networks
 - Explain entity resolution decisions (HOW and WHY analysis)
-- View engine statistics and configuration
 
 ## Features
 
-This is a **read-only** MCP server providing 8 tools for entity resolution analysis:
+This is a **read-only** MCP server providing 7 tools for entity resolution analysis:
 
 ### Entity Search & Retrieval
-- **search_entities**: Search by name, address, phone, email, etc.
-- **get_entity**: Retrieve detailed entity information by ID
+- **search**: Search by name, address, phone, email, etc.
+- **get_entity**: Retrieve detailed entity information by entity ID
+- **get_source_record**: Look up entity by source record ID (e.g., CUSTOMERS:1001)
 
 ### Relationship Analysis
 - **find_relationship_path**: Discover paths between entities
-- **find_network**: Analyze networks of related entities
-- **explain_relationship**: Understand why entities are related (WHY analysis)
-- **explain_entity_resolution**: See how entities were resolved (HOW analysis)
-
-### Configuration & Diagnostics
-- **get_stats**: View engine statistics and metrics
-- **get_config_info**: Check configuration and version info
+- **expand_entity_network**: Expand networks of related entities to (n) degrees (max 3)
+- **explain_why_entities_related**: Explain why two entities are related (WHY analysis)
+- **how_entity_resolved**: See how entities were resolved (HOW analysis)
 
 ## Installation
 
