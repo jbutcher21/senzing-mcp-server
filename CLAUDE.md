@@ -21,16 +21,11 @@ This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity r
 git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
 
-# Ensure your .bashrc has Senzing environment variables:
-# - SENZING_ENGINE_CONFIGURATION_JSON (required)
-# - LD_LIBRARY_PATH including Senzing libraries
-# - PYTHONPATH including Senzing Python SDK
+# Make launch script executable
+chmod +x launch_senzing_mcp.sh
 
-# Install in development mode
-pip install -e .
-
-# The server command becomes available after installation
-senzing-mcp
+# Environment variables are configured in your AI assistant's MCP config
+# (see Configuration section in the setup documentation)
 ```
 
 ### Running the Server
@@ -76,7 +71,7 @@ python examples/get_entity.py 1            # Get entity by ID
 
 ### SDK Integration
 
-The Senzing SDK must be initialized in the environment before the MCP server starts. The launch scripts handle this by sourcing the user's .bashrc file, which should contain Senzing initialization.
+The Senzing SDK requires environment variables to be set before the MCP server starts. These environment variables are passed from the AI assistant's MCP configuration through the launch script to the server.
 
 The SDK provides the core component initialized through the factory:
 - `SzEngine`: Entity operations (search, get, relationships, explanations)
@@ -141,35 +136,34 @@ Server tool handlers (server.py:172):
 
 ### Portable Configuration
 
-The codebase is designed to be portable across different servers. Each deployment requires proper environment setup:
+The codebase is designed to be portable across different servers. Each deployment requires proper environment configuration in the MCP client:
 
 **Server-side (where Senzing is installed):**
-1. Add Senzing initialization to your .bashrc file:
-   - Set `SENZING_ENGINE_CONFIGURATION_JSON` with database connection and paths
-   - Add Senzing libraries to `LD_LIBRARY_PATH`
-   - Add Senzing Python SDK to `PYTHONPATH`
-2. Clone the repository
-3. Run `pip install -e .`
-4. Optionally edit `launch_senzing_mcp.sh` if venv path differs from default
+1. Clone the repository
+2. Make launch script executable: `chmod +x launch_senzing_mcp.sh`
 
 **For LOCAL deployment (AI assistant and Senzing on same machine):**
-1. Point your AI assistant's MCP config directly to `launch_senzing_mcp.sh`
-2. The script will source your .bashrc to load environment variables
+1. Point your AI assistant's MCP config to `launch_senzing_mcp.sh`
+2. Set environment variables in the MCP config's `env` section:
+   - `SENZING_ENGINE_CONFIGURATION_JSON` (required)
+   - `LD_LIBRARY_PATH` (required)
+   - `PYTHONPATH` (required)
 
 **For REMOTE deployment (AI assistant on different machine):**
 1. Copy `launch_senzing_mcp_ssh.sh` to your client machine
 2. Edit configuration: set remote host, user, SSH key, and path to `launch_senzing_mcp.sh` on remote server
 3. Update AI assistant's MCP config to point to `launch_senzing_mcp_ssh.sh`
+4. Set environment variables in the MCP config's `env` section (same as local deployment)
 
 ### How MCP Servers Work
 
 The AI assistant spawns the MCP server as a subprocess for each session:
-- **Local**: AI runs `launch_senzing_mcp.sh` which sources .bashrc and starts the server
-- **Remote**: AI runs `launch_senzing_mcp_ssh.sh` which SSH's to remote and calls `launch_senzing_mcp.sh` there
+- **Local**: AI runs `launch_senzing_mcp.sh` with environment variables from MCP config's `env` section
+- **Remote**: AI runs `launch_senzing_mcp_ssh.sh` which passes environment variables via SSH to the remote server
 - Communication happens via stdio (stdin/stdout) using JSON-RPC
 - The server terminates when the AI session ends
 
-**Important**: Subprocesses do NOT automatically inherit .bashrc environment variables, which is why `launch_senzing_mcp.sh` explicitly sources it. Never point MCP config directly to `senzing-mcp` binary - always use the launch script.
+**Important**: Environment variables must be set in the MCP configuration's `env` section. The MCP client passes these to the launch script, which then passes them to the Python server process.
 
 ## AI Assistant Integration
 
@@ -202,13 +196,22 @@ senzing-mcp-server/
 
 ## Common Issues
 
-**SDK Import Errors**: Ensure Senzing environment is initialized in your .bashrc file. The launch script sources .bashrc to get environment variables.
+**SDK Import Errors**: Ensure `LD_LIBRARY_PATH` and `PYTHONPATH` are correctly set in your MCP config's `env` section. These are required for the Senzing SDK to load properly.
 
-**Environment Not Set**: If you get "SENZING_ENGINE_CONFIGURATION_JSON is not set" error, add Senzing initialization to your .bashrc:
-  ```bash
-  export SENZING_ENGINE_CONFIGURATION_JSON='{"PIPELINE":{"CONFIGPATH":"/etc/opt/senzing",...}}'
-  export LD_LIBRARY_PATH="/path/to/senzing/lib:$LD_LIBRARY_PATH"
-  export PYTHONPATH="/path/to/senzing/sdk/python:$PYTHONPATH"
+**Environment Not Set**: If you get "SENZING_ENGINE_CONFIGURATION_JSON is not set" error, add the environment variables to your MCP config's `env` section:
+  ```json
+  {
+    "mcpServers": {
+      "senzing": {
+        "command": "/path/to/launch_senzing_mcp.sh",
+        "env": {
+          "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",...}}",
+          "LD_LIBRARY_PATH": "/opt/senzing/lib",
+          "PYTHONPATH": "/opt/senzing/sdk/python"
+        }
+      }
+    }
+  }
   ```
 
 **Initialization Failures**: Check `SENZING_ENGINE_CONFIGURATION_JSON` is valid JSON with correct paths and database connection.

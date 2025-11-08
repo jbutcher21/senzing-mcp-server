@@ -41,28 +41,12 @@ git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
 ```
 
-2. Configure the launch script for your deployment:
+2. Make the launch script executable:
 ```bash
-# Edit launch_senzing_mcp.sh and set SENZING_ROOT to your Senzing installation path
-# Example: SENZING_ROOT="/opt/senzing"
-nano launch_senzing_mcp.sh
+chmod +x launch_senzing_mcp.sh
 ```
 
-**Note**: No pip install required - the launch script runs directly from source.
-
-4. Configure environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your Senzing configuration
-```
-
-Required environment variables:
-- `SENZING_ENGINE_CONFIGURATION_JSON`: JSON string with database and resource paths
-
-Optional environment variables:
-- `SENZING_MODULE_NAME`: Module identifier (default: "senzing-mcp")
-- `SENZING_INSTANCE_NAME`: Instance name (default: "senzing-mcp-server")
-- `SENZING_LOG_LEVEL`: Verbosity level (default: 0)
+**Note**: No pip install required - the launch script runs directly from source. Environment variables are configured in your AI assistant's MCP configuration (see Configuration section below).
 
 ## Usage
 
@@ -105,14 +89,27 @@ Add to your Claude Desktop MCP settings file:
 {
   "mcpServers": {
     "senzing": {
-      "command": "senzing-mcp",
+      "command": "/path/to/senzing-mcp-server/launch_senzing_mcp.sh",
       "env": {
-        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\": {\"CONFIGPATH\": \"/etc/opt/senzing\", \"RESOURCEPATH\": \"/opt/senzing/g2/resources\", \"SUPPORTPATH\": \"/opt/senzing/data\"}, \"SQL\": {\"CONNECTION\": \"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}"
+        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\": {\"CONFIGPATH\": \"/etc/opt/senzing\", \"RESOURCEPATH\": \"/opt/senzing/g2/resources\", \"SUPPORTPATH\": \"/opt/senzing/data\"}, \"SQL\": {\"CONNECTION\": \"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
+        "LD_LIBRARY_PATH": "/opt/senzing/lib",
+        "PYTHONPATH": "/opt/senzing/sdk/python"
       }
     }
   }
 }
 ```
+
+**Configuration Notes:**
+- `command`: Full path to the `launch_senzing_mcp.sh` script
+- `SENZING_ENGINE_CONFIGURATION_JSON`: Your Senzing database configuration (must be escaped JSON)
+- `LD_LIBRARY_PATH`: Path to Senzing shared libraries
+- `PYTHONPATH`: Path to Senzing Python SDK (if not system-wide installed)
+
+**Optional environment variables:**
+- `SENZING_MODULE_NAME`: Module identifier (default: "senzing-mcp")
+- `SENZING_INSTANCE_NAME`: Instance name (default: "senzing-mcp-server")
+- `SENZING_LOG_LEVEL`: Verbosity level (default: 0)
 
 ### Example Queries in Claude
 
@@ -267,9 +264,12 @@ senzing-mcp
 - Ensure Senzing resources are accessible at specified paths
 
 **Import Path Issues**
-- Ensure Senzing environment is initialized in your .bashrc file
-- Verify the Senzing SDK Python modules are in your Python path
-- Check that you can import senzing modules: `python -c "import senzing"`
+- Verify `LD_LIBRARY_PATH` and `PYTHONPATH` are set correctly in your MCP config's `env` section
+- Check that you can import senzing modules with environment variables set:
+  ```bash
+  LD_LIBRARY_PATH=/opt/senzing/lib PYTHONPATH=/opt/senzing/sdk/python \
+    python -c "import senzing"
+  ```
 
 **Performance Issues with Bulk Import**
 - Adjust `max_workers` parameter (default: 5)

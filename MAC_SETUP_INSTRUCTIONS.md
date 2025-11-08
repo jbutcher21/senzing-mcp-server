@@ -55,12 +55,18 @@ cat > ~/Library/Application\ Support/ChatGPT/mcp_config.json << 'EOF'
     "senzing": {
       "command": "/Users/jbutcher/senzing-mcp/launch_senzing_mcp_ssh.sh",
       "description": "Senzing Entity Resolution MCP Server (via SSH to 192.168.2.111)",
-      "env": {}
+      "env": {
+        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
+        "LD_LIBRARY_PATH": "/opt/senzing/lib",
+        "PYTHONPATH": "/opt/senzing/sdk/python"
+      }
     }
   }
 }
 EOF
 ```
+
+**Important**: Update the environment variables above to match your remote server's Senzing installation paths. The SSH launcher script will pass these to the remote server.
 
 ### 4. Restart ChatGPT Desktop
 
@@ -139,9 +145,16 @@ ssh-add -l
 
 1. Check ChatGPT logs (if available)
 2. Test SSH connection manually
-3. Verify the remote Senzing environment is set up correctly in .bashrc:
+3. Verify the environment variables are correctly set in your MCP config:
    ```bash
-   ssh jbutcher@192.168.2.111 "echo \$SENZING_ENGINE_CONFIGURATION_JSON"
+   cat ~/Library/Application\ Support/ChatGPT/mcp_config.json | grep -A 5 '"env"'
+   ```
+4. Test that the SSH launcher passes environment variables correctly:
+   ```bash
+   SENZING_ENGINE_CONFIGURATION_JSON='{"PIPELINE":...}' \
+   LD_LIBRARY_PATH=/opt/senzing/lib \
+   PYTHONPATH=/opt/senzing/sdk/python \
+     ~/senzing-mcp/launch_senzing_mcp_ssh.sh
    ```
 
 ### Slow Response Times
@@ -213,6 +226,6 @@ See the main README's "Response Formatting Guide" section for details and exampl
 **On remote server (192.168.2.111):**
 - Remote launch script: `/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh`
 - MCP server source: `/data/etl/senzing/er/v4beta/senzingMCP/src/senzing_mcp/server.py`
-- Environment setup: Senzing environment variables in `~/.bashrc`
+- Environment setup: Senzing environment variables passed via SSH from MCP config
 
-**Note**: The launch script now runs the MCP server directly from source without requiring pip installation.
+**Note**: The launch script runs the MCP server directly from source without requiring pip installation. Environment variables are configured in the MCP config on your Mac and passed to the remote server via SSH.

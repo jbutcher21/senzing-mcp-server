@@ -2,7 +2,11 @@
   "mcpServers": {
     "senzing": {
       "command": "/Users/jbutcher/senzing-mcp/launch_senzing_mcp_ssh.sh",
-      "args": []
+      "env": {
+        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
+        "LD_LIBRARY_PATH": "/opt/senzing/lib",
+        "PYTHONPATH": "/opt/senzing/sdk/python"
+      }
     }
   }
 }

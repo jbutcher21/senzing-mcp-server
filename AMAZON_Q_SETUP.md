@@ -23,23 +23,11 @@ First, set up the Senzing MCP server on your AWS instance:
 git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
 
-# Configure for your deployment
-# Edit launch_senzing_mcp.sh and set SENZING_ROOT to your Senzing installation path
-nano launch_senzing_mcp.sh
-# Set: SENZING_ROOT="/path/to/your/senzing"
+# Make launch script executable
+chmod +x launch_senzing_mcp.sh
 ```
 
-**Note**: No pip install required - the launch script runs directly from source.
-
-### Verify Setup
-
-```bash
-# Test the launch script
-./launch_senzing_mcp.sh --help
-
-# Verify Senzing environment (should be in your .bashrc)
-python -c "import senzing; print('Senzing SDK accessible')"
-```
+**Note**: No pip install required - the launch script runs directly from source. All environment variables are configured in the MCP client's configuration (see below).
 
 ## Quick Start - Recommended Method (GUI)
 
@@ -56,9 +44,10 @@ The easiest way to configure Amazon Q Developer with the Senzing MCP server is t
    - Choose **STDIO** transport
    - Fill in the details:
      - **Command:** Full path to `launch_senzing_mcp.sh` (e.g., `/home/ubuntu/senzingMCP/launch_senzing_mcp.sh`)
-     - **Environment Variables:** Add the following:
+     - **Environment Variables:** Add the following (required):
        - `SENZING_ENGINE_CONFIGURATION_JSON`: Your Senzing config JSON (see example below)
        - `LD_LIBRARY_PATH`: Path to Senzing libraries (e.g., `/opt/senzing/er/lib`)
+       - `PYTHONPATH`: Path to Senzing Python SDK (e.g., `/opt/senzing/sdk/python`) if not system-wide
      - **Timeout:** `60000` (milliseconds)
 
 5. **Set tool permissions** (Ask, Always allow, or Deny) for each Senzing tool
@@ -106,7 +95,8 @@ nano ~/.aws/amazonq/agents/default.json
       "timeout": 60000,
       "env": {
         "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/er/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/home/ubuntu/sz_sqlite/G2C.db\"}}",
-        "LD_LIBRARY_PATH": "/opt/senzing/er/lib"
+        "LD_LIBRARY_PATH": "/opt/senzing/er/lib",
+        "PYTHONPATH": "/opt/senzing/sdk/python"
       }
     }
   }
@@ -143,7 +133,10 @@ Add to your `.codecatalyst/workflows/mcp-config.yaml`:
 mcpServers:
   senzing:
     command: /path/to/senzing-mcp-server/launch_senzing_mcp.sh
-    env: {}
+    env:
+      SENZING_ENGINE_CONFIGURATION_JSON: '{"PIPELINE":{"CONFIGPATH":"/etc/opt/senzing","RESOURCEPATH":"/opt/senzing/er/resources","SUPPORTPATH":"/opt/senzing/data"},"SQL":{"CONNECTION":"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db"}}'
+      LD_LIBRARY_PATH: /opt/senzing/er/lib
+      PYTHONPATH: /opt/senzing/sdk/python
 ```
 
 2. **Configure in IDE Settings**
@@ -151,6 +144,7 @@ mcpServers:
 Open Settings → Extensions → Amazon Q Developer → MCP Servers and add:
 - **Name**: senzing
 - **Command**: `/path/to/senzing-mcp-server/launch_senzing_mcp.sh` (use your actual path)
+- **Environment Variables**: Set SENZING_ENGINE_CONFIGURATION_JSON, LD_LIBRARY_PATH, and PYTHONPATH as shown above
 
 3. **Reload Amazon Q Developer**
 
@@ -351,19 +345,19 @@ See the main README's "Response Formatting Guide" section for more details and e
    # Press Ctrl+C to exit
    ```
 
-2. **Verify Environment Setup**
+2. **Verify Environment Variables in MCP Config**
    ```bash
-   # Check that Senzing environment variables are set in .bashrc
-   grep SENZING_ENGINE_CONFIGURATION_JSON ~/.bashrc
+   # Check that your MCP config includes environment variables
+   cat ~/.aws/amazonq/agents/default.json | grep -A 5 '"env"'
 
-   # Verify environment is loaded
-   echo $SENZING_ENGINE_CONFIGURATION_JSON
+   # Verify the config has SENZING_ENGINE_CONFIGURATION_JSON and LD_LIBRARY_PATH
    ```
 
 3. **Check Senzing SDK Access**
    ```bash
-   # The SDK should be importable (ensure .bashrc is sourced)
-   python3 -c "from senzing import SzEngine; print('Senzing SDK accessible')"
+   # Test that the SDK can be imported with environment variables set
+   LD_LIBRARY_PATH=/opt/senzing/er/lib PYTHONPATH=/opt/senzing/sdk/python \
+     python3 -c "from senzing import SzEngine; print('Senzing SDK accessible')"
    ```
 
 ### Data Query Issues
@@ -373,21 +367,26 @@ See the main README's "Response Formatting Guide" section for more details and e
    # Navigate to your MCP server directory
    cd /path/to/senzing-mcp-server
 
-   # Run test search using example script (ensure .bashrc is sourced)
-   python examples/search_entity.py "Smith"
+   # Run test search using example script with environment variables set
+   LD_LIBRARY_PATH=/opt/senzing/er/lib \
+   PYTHONPATH=/opt/senzing/sdk/python \
+   SENZING_ENGINE_CONFIGURATION_JSON='{"PIPELINE":...}' \
+     python examples/search_entity.py "Smith"
    ```
 
 2. **Check Database Connection**
    ```bash
    # Verify database file exists (for SQLite)
-   # Path depends on your SENZING_ENGINE_CONFIGURATION_JSON
+   # Path should match what's in your MCP config's SENZING_ENGINE_CONFIGURATION_JSON
    ls -la /path/to/your/senzing/database/G2C.db
    ```
 
 3. **Review Engine Configuration**
    ```bash
-   # After sourcing senzing_env.sh, check config is valid
-   echo $SENZING_ENGINE_CONFIGURATION_JSON | python3 -m json.tool
+   # Extract and validate JSON from your MCP config
+   cat ~/.aws/amazonq/agents/default.json | \
+     grep SENZING_ENGINE_CONFIGURATION_JSON | \
+     python3 -m json.tool
    ```
 
 ### Permission Issues
@@ -403,27 +402,6 @@ ls -la /path/to/senzing-mcp-server/
 ```
 
 ## Advanced Configuration
-
-### Custom Environment Variables
-
-If you need to override environment variables (instead of using launch script):
-
-```json
-{
-  "mcpServers": {
-    "senzing": {
-      "command": "senzing-mcp",
-      "env": {
-        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
-        "LD_LIBRARY_PATH": "/opt/senzing/lib",
-        "SENZING_LOG_LEVEL": "1"
-      }
-    }
-  }
-}
-```
-
-**Note**: Adjust paths to match your Senzing installation. This approach bypasses the launch script.
 
 ### Using with AWS Systems Manager
 

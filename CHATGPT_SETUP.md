@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - ChatGPT Desktop App installed (with MCP support)
-- Senzing MCP server cloned and configured in `/data/etl/senzing/er/v4beta/senzingMCP/`
+- Senzing MCP server cloned (adjust paths below to match your installation location)
 
 ## Installation Steps
 
@@ -26,23 +26,43 @@ The ChatGPT Desktop app stores MCP configuration in:
 ~/.config/ChatGPT/
 ```
 
-### 2. Create or Update MCP Configuration
+### 2. Create MCP Configuration
 
-1. Navigate to the ChatGPT configuration directory
-2. Create or edit the file `mcp_config.json`
-3. Copy the contents from `chatgpt_mcp_config.json` in this directory
+Create or edit the file `mcp_config.json` in the ChatGPT configuration directory:
 
-**Quick command for macOS:**
+**macOS:**
 ```bash
 # Create the directory if it doesn't exist
 mkdir -p ~/Library/Application\ Support/ChatGPT/
 
-# Copy the configuration
-cp /data/etl/senzing/er/v4beta/senzingMCP/chatgpt_mcp_config.json \
-   ~/Library/Application\ Support/ChatGPT/mcp_config.json
+# Create the configuration file
+nano ~/Library/Application\ Support/ChatGPT/mcp_config.json
 ```
 
-**Note**: The launch script now runs directly from source without requiring pip installation.
+Add the following configuration (adjust paths to match your installation):
+
+```json
+{
+  "mcpServers": {
+    "senzing": {
+      "command": "/path/to/senzing-mcp-server/launch_senzing_mcp.sh",
+      "env": {
+        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
+        "LD_LIBRARY_PATH": "/opt/senzing/lib",
+        "PYTHONPATH": "/opt/senzing/sdk/python"
+      }
+    }
+  }
+}
+```
+
+**Configuration Notes:**
+- Replace `/path/to/senzing-mcp-server/` with the actual path where you cloned the repository
+- Update `SENZING_ENGINE_CONFIGURATION_JSON` with your database connection details
+- Update `LD_LIBRARY_PATH` to point to your Senzing library directory
+- Update `PYTHONPATH` to point to your Senzing Python SDK location
+
+**Note**: The launch script runs directly from source without requiring pip installation. All environment variables are set in the MCP configuration above.
 
 ### 3. Restart ChatGPT Desktop
 
@@ -110,19 +130,22 @@ See the main README's "Response Formatting Guide" section for more details and e
 
 ### Connection Errors
 
-1. Test the launch script manually:
+1. Test the launch script manually with environment variables:
    ```bash
-   /data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh
+   LD_LIBRARY_PATH=/opt/senzing/lib \
+   PYTHONPATH=/opt/senzing/sdk/python \
+   SENZING_ENGINE_CONFIGURATION_JSON='{"PIPELINE":...}' \
+     /path/to/senzing-mcp-server/launch_senzing_mcp.sh
    ```
-2. Verify environment variables are set in your .bashrc:
+2. Verify environment variables are correctly set in your MCP config:
    ```bash
-   echo $SENZING_ENGINE_CONFIGURATION_JSON
+   cat ~/Library/Application\ Support/ChatGPT/mcp_config.json | grep -A 5 '"env"'
    ```
 
 ### No Data Returned
 
 1. Verify the Senzing database has data
-2. Check that your .bashrc properly sets SENZING_ENGINE_CONFIGURATION_JSON with the correct database path
+2. Check that your `SENZING_ENGINE_CONFIGURATION_JSON` in the MCP config points to the correct database
 3. Review logs in ChatGPT application
 
 ## Notes
@@ -130,4 +153,4 @@ See the main README's "Response Formatting Guide" section for more details and e
 - This is a **read-only** MCP server - no data modification operations are available
 - The server starts fresh for each ChatGPT session
 - All queries go through the configured Senzing repository
-- Environment setup is handled automatically by the launch script
+- Environment variables are passed from the MCP configuration to the server
