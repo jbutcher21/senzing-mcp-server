@@ -41,106 +41,95 @@ nano launch_senzing_mcp.sh
 python -c "import senzing; print('Senzing SDK accessible')"
 ```
 
-## Quick Start for AWS Code Server
+## Quick Start - Recommended Method (GUI)
 
-If you're using **AWS Code Server** (browser-based VS Code), follow these steps:
+The easiest way to configure Amazon Q Developer with the Senzing MCP server is through the GUI:
 
-1. **Set up the MCP server** on your Code Server instance (see Installation section above)
+1. **Set up the MCP server** on your instance (see Installation section below)
 
-2. **Create MCP configuration:**
-   ```bash
-   mkdir -p ~/.amazon-q/mcp
-   nano ~/.amazon-q/mcp/config.json
-   ```
+2. **Open Amazon Q Chat** in your IDE (VS Code/Code Server)
 
-   Add this content (adjust path to where you cloned the repo):
-   ```json
-{
-   "mcpServers": {
-      "senzing": {
-      "command": "/home/ec2-user/senzing-mcp-server/launch_senzing_mcp.sh",
-      "args": [],
-      "env": {}
-      }
-   }
-}
-   ```
+3. **Click the tools icon** (⚙️) in the Amazon Q Chat panel
 
-3. **Reload Amazon Q Developer:**
-   - Press `Ctrl+Shift+P` (Command Palette)
-   - Type: `Developer: Reload Window`
-   - Press Enter
-   - **Your browser tab stays open** - this just reloads the VS Code window
+4. **Add MCP Server:**
+   - Click "Add Server" or "+"
+   - Choose **STDIO** transport
+   - Fill in the details:
+     - **Command:** Full path to `launch_senzing_mcp.sh` (e.g., `/home/ubuntu/senzingMCP/launch_senzing_mcp.sh`)
+     - **Environment Variables:** Add the following:
+       - `SENZING_ENGINE_CONFIGURATION_JSON`: Your Senzing config JSON (see example below)
+       - `LD_LIBRARY_PATH`: Path to Senzing libraries (e.g., `/opt/senzing/er/lib`)
+     - **Timeout:** `60000` (milliseconds)
 
-4. **Verify it works:**
-   - Open Amazon Q chat
-   - Ask: "What MCP tools are available?"
-   - You should see Senzing tools listed
+5. **Set tool permissions** (Ask, Always allow, or Deny) for each Senzing tool
 
-## Detailed Configuration Steps
+6. **Test:** Ask Amazon Q "What MCP tools are available?"
 
-### Option 1: AWS Cloud9 or Code Server (Local)
+### Environment Variable Example
 
-When the Senzing MCP server is installed on the **same instance** as your IDE.
-
-#### 1. Configure MCP Settings
-
-Create the Amazon Q Developer MCP configuration file:
-
-```bash
-# Create configuration directory
-mkdir -p ~/.amazon-q/mcp
-
-# Create MCP configuration
-# Replace /path/to with your actual senzing-mcp-server installation path
-cat > ~/.amazon-q/mcp/config.json << 'EOF'
-{
-  "mcpServers": {
-    "senzing": {
-      "command": "/path/to/senzing-mcp-server/launch_senzing_mcp.sh",
-      "args": [],
-      "env": {}
-    }
-  }
-}
-EOF
+For `SENZING_ENGINE_CONFIGURATION_JSON`, use your actual Senzing configuration:
+```json
+{"PIPELINE":{"CONFIGPATH":"/etc/opt/senzing","RESOURCEPATH":"/opt/senzing/er/resources","SUPPORTPATH":"/opt/senzing/data"},"SQL":{"CONNECTION":"sqlite3://na:na@/home/ubuntu/sz_sqlite/G2C.db"}}
 ```
 
-**Example** for installation in home directory:
+**Note:** This must be a single-line JSON string with escaped quotes if needed.
+
+## Alternative: Manual Configuration (JSON File)
+
+If you prefer manual configuration, Amazon Q Developer stores MCP configurations in:
+
+**Global Configuration File:**
+```bash
+~/.aws/amazonq/agents/default.json
+```
+
+### Manual Configuration Steps
+
+#### 1. Create the configuration file:
+
+```bash
+# Create directory if it doesn't exist
+mkdir -p ~/.aws/amazonq/agents
+
+# Edit the configuration
+nano ~/.aws/amazonq/agents/default.json
+```
+
+#### 2. Add your MCP server configuration:
+
 ```json
 {
   "mcpServers": {
     "senzing": {
-      "command": "/home/ec2-user/senzing-mcp-server/launch_senzing_mcp.sh",
-      "args": [],
-      "env": {}
+      "command": "/home/ubuntu/senzingMCP/launch_senzing_mcp.sh",
+      "disabled": false,
+      "timeout": 60000,
+      "env": {
+        "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/er/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/home/ubuntu/sz_sqlite/G2C.db\"}}",
+        "LD_LIBRARY_PATH": "/opt/senzing/er/lib"
+      }
     }
   }
 }
 ```
 
-**Note**: The `launch_senzing_mcp.sh` script sources your .bashrc to get the required Senzing environment variables.
+**Important Notes:**
+- Use the **full absolute path** to your `launch_senzing_mcp.sh` script
+- The `SENZING_ENGINE_CONFIGURATION_JSON` must be a **single-line escaped JSON string**
+- Adjust paths to match your installation
+- Set `disabled: false` to enable the server
+- `timeout` is in milliseconds (60000 = 60 seconds)
 
-#### 2. Reload Amazon Q Developer
+#### 3. Reload Amazon Q Developer
 
-After creating the configuration file, reload Amazon Q Developer to load the new MCP server:
+After creating or modifying the configuration file, reload Amazon Q:
 
-**Method 1: Reload Window (Recommended)**
+**For VS Code / Code Server:**
 1. Open Command Palette: `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
 2. Type: `Developer: Reload Window`
 3. Press Enter
 
-**Method 2: Reload Extension**
-1. Open Extensions panel: `Ctrl+Shift+X` (or `Cmd+Shift+X` on Mac)
-2. Find "Amazon Q" in the list
-3. Click the gear icon → "Reload"
-
-**Method 3: Restart Extension Host**
-1. Open Command Palette: `Ctrl+Shift+P`
-2. Type: `Developer: Restart Extension Host`
-3. Press Enter
-
-**Note**: For browser-based Code Server, these commands work the same way and won't close your browser tab or disconnect your session.
+**Note**: For browser-based Code Server, this reloads the VS Code window but won't close your browser tab or disconnect your session.
 
 ### Option 2: AWS CodeCatalyst Setup
 
