@@ -43,7 +43,7 @@ The easiest way to configure Amazon Q Developer with the Senzing MCP server is t
    - Click "Add Server" or "+"
    - Choose **STDIO** transport
    - Fill in the details:
-     - **Command:** Full path to `launch_senzing_mcp.sh` (e.g., `/home/ubuntu/senzingMCP/launch_senzing_mcp.sh`)
+     - **Command:** Full path to `launch_senzing_mcp.sh` (e.g., `/home/ubuntu/senzing-mcp-server/launch_senzing_mcp.sh`)
      - **Environment Variables:** Add the following (required):
        - `SENZING_ENGINE_CONFIGURATION_JSON`: Your Senzing config JSON (see example below)
        - `LD_LIBRARY_PATH`: Path to Senzing libraries (e.g., `/opt/senzing/er/lib`)
@@ -90,7 +90,7 @@ nano ~/.aws/amazonq/agents/default.json
 {
   "mcpServers": {
     "senzing": {
-      "command": "/home/ubuntu/senzingMCP/launch_senzing_mcp.sh",
+      "command": "/home/ubuntu/senzing-mcp-server/launch_senzing_mcp.sh",
       "disabled": false,
       "timeout": 60000,
       "env": {
