@@ -144,7 +144,7 @@ This MCP server works with any MCP-compatible assistant. The setup pattern is si
 
 3. **Restart your AI assistant** to load the MCP server
 
-**Remote Setup**: For SSH-based remote server access, see [MAC_SETUP_INSTRUCTIONS.md](MAC_SETUP_INSTRUCTIONS.md) for an example pattern.
+**Note**: For SSH-based remote access, see the `launch_senzing_mcp_ssh.sh` script which includes configuration instructions in its comments.
 
 ### Example Queries in Claude
 
