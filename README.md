@@ -41,12 +41,17 @@ git clone https://github.com/yourusername/senzing-mcp-server.git
 cd senzing-mcp-server
 ```
 
-2. Make the launch script executable:
+2. Install Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Make the launch script executable:
 ```bash
 chmod +x launch_senzing_mcp.sh
 ```
 
-**Note**: No pip install required - the launch script runs directly from source. Environment variables are configured in your AI assistant's MCP configuration (see Configuration section below).
+**Note**: The server runs directly from source after installing dependencies. Environment variables are configured in your AI assistant's MCP configuration (see Configuration section below).
 
 ## Usage
 

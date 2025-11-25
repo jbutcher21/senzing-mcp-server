@@ -1,0 +1,3 @@
+# Model Context Protocol - Official Python SDK from Anthropic
+# https://github.com/modelcontextprotocol/python-sdk
+mcp>=1.0.0
