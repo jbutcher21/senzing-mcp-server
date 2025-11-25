@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "senzing": {
-      "command": "/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh",
+      "command": "/path/to/senzing-mcp-server/launch_senzing_mcp.sh",
       "description": "Senzing Entity Resolution MCP Server - Read-only access to entity resolution data",
       "env": {
         "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",

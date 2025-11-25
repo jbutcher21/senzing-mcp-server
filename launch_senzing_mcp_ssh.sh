@@ -20,17 +20,17 @@
 #==============================================================================
 
 # Remote server where Senzing is installed
-REMOTE_HOST="192.168.2.111"
+REMOTE_HOST="your-server-ip"
 
 # User account on the remote server
-REMOTE_USER="jbutcher"
+REMOTE_USER="your-username"
 
 # SSH key for authentication (use full path)
 SSH_KEY="$HOME/.ssh/id_rsa"
 
 # Path to the launch script on the REMOTE server
 # (This should match where you cloned the senzing-mcp-server repo)
-REMOTE_SCRIPT="/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh"
+REMOTE_SCRIPT="/path/to/senzing-mcp-server/launch_senzing_mcp.sh"
 
 #==============================================================================
 # END CONFIGURATION

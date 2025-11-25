@@ -30,7 +30,7 @@ This is a **read-only** MCP server providing 7 tools for entity resolution analy
 ### Prerequisites
 
 - Python 3.10 or higher
-- Senzing SDK v4beta installed and environment initialized
+- Senzing SDK version 4 installed and environment initialized
 - Senzing database configured and accessible
 
 ### Setup
