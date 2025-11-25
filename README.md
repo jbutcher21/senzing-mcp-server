@@ -75,12 +75,7 @@ senzing-mcp
 
 ### Configuration for AI Assistants
 
-This MCP server can be used with multiple AI assistants:
-
-- **Claude Desktop**: See installation instructions below
-- **ChatGPT Desktop**: See [CHATGPT_SETUP.md](CHATGPT_SETUP.md)
-- **Amazon Q Developer**: See [AMAZON_Q_SETUP.md](AMAZON_Q_SETUP.md)
-- **Remote Setup (Mac to Linux)**: See [MAC_SETUP_INSTRUCTIONS.md](MAC_SETUP_INSTRUCTIONS.md)
+This MCP server works with any MCP-compatible AI assistant. Below are detailed instructions for Claude (Desktop and Code), plus guidance for other assistants.
 
 #### Claude Desktop Configuration
 
@@ -115,6 +110,41 @@ Add to your Claude Desktop MCP settings file:
 - `SENZING_MODULE_NAME`: Module identifier (default: "senzing-mcp")
 - `SENZING_INSTANCE_NAME`: Instance name (default: "senzing-mcp-server")
 - `SENZING_LOG_LEVEL`: Verbosity level (default: 0)
+
+#### Claude Code Configuration
+
+Claude Code (the CLI tool at claude.ai/code) uses the same MCP configuration as Claude Desktop. Configure in your VS Code settings or `~/.config/claude-code/config.json` with the same format as above.
+
+See [Claude Code MCP documentation](https://docs.claude.com/claude-code) for platform-specific details.
+
+#### Other AI Assistants (ChatGPT, Amazon Q, etc.)
+
+This MCP server works with any MCP-compatible assistant. The setup pattern is similar:
+
+1. **Locate your assistant's MCP config file**:
+   - ChatGPT Desktop: `~/Library/Application Support/ChatGPT/mcp_config.json` (macOS)
+   - Amazon Q Developer: VS Code settings → Amazon Q → MCP Servers
+   - See official MCP documentation: https://modelcontextprotocol.io
+
+2. **Add server configuration** with these key environment variables:
+   ```json
+   {
+     "mcpServers": {
+       "senzing": {
+         "command": "/path/to/senzing-mcp-server/launch_senzing_mcp.sh",
+         "env": {
+           "SENZING_ENGINE_CONFIGURATION_JSON": "{...}",
+           "LD_LIBRARY_PATH": "/opt/senzing/lib",
+           "PYTHONPATH": "/opt/senzing/sdk/python"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Restart your AI assistant** to load the MCP server
+
+**Remote Setup**: For SSH-based remote server access, see [MAC_SETUP_INSTRUCTIONS.md](MAC_SETUP_INSTRUCTIONS.md) for an example pattern.
 
 ### Example Queries in Claude
 
