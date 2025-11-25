@@ -1,110 +1,77 @@
-# MCP Server Example Scripts
+# MCP Server Test Client
 
-These scripts demonstrate how to interact with the Senzing MCP server directly using the MCP Python client. They're useful for testing your setup and understanding how the MCP server works.
+This directory contains a test client for interacting with the Senzing MCP server directly using the MCP Python SDK. It's useful for testing your setup and understanding how the MCP server works.
 
 ## Prerequisites
 
-Before running these examples, ensure:
-
-1. The MCP server is installed:
+1. **MCP server installed**:
    ```bash
    cd /path/to/senzing-mcp-server
    pip install -e .
    ```
 
-2. Senzing environment is configured in your .bashrc:
+2. **Senzing environment configured**:
    ```bash
-   # Ensure your .bashrc has:
-   # - SENZING_ENGINE_CONFIGURATION_JSON
-   # - LD_LIBRARY_PATH including Senzing libraries
-   # - PYTHONPATH including Senzing Python SDK
+   # Required environment variables:
+   export SENZING_ENGINE_CONFIGURATION_JSON='{...}'
+   export LD_LIBRARY_PATH=/opt/senzing/lib
+   export PYTHONPATH=/opt/senzing/sdk/python
    ```
 
-## Available Examples
+## Usage
 
-### `quick_test.py`
+The `senzing_test.py` script provides a unified CLI for testing all 7 MCP tools:
 
-Quick test to verify the MCP server is working and list available tools.
-
-**Usage:**
 ```bash
-./venv/bin/python examples/quick_test.py
+# List available MCP tools
+python senzing_test.py list-tools
+
+# Search for entities by name
+python senzing_test.py search "John Smith"
+
+# Get entity details by ID
+python senzing_test.py get 1
+
+# Get entity by source record
+python senzing_test.py get-record CUSTOMERS 1001
+
+# Find relationship path between entities
+python senzing_test.py find-path 1 2
+python senzing_test.py find-path 1 2 3  # with max_degrees
+
+# Expand entity network
+python senzing_test.py expand 1
+python senzing_test.py expand 1 2     # with max_degrees
+python senzing_test.py expand 1 2 20  # with max_degrees and max_entities
+
+# Explain why entities are related
+python senzing_test.py why 1 2
+
+# Explain how entity was resolved
+python senzing_test.py how 1
 ```
 
-**What it does:**
-- Connects to the MCP server
-- Lists all available tools
-- Shows tool names and descriptions
+### Built-in Help
 
-### `search_entity.py`
+Run without arguments to see full usage documentation:
 
-Search for entities by name and display results with features.
-
-**Usage:**
 ```bash
-# Search for a specific name
-./venv/bin/python examples/search_entity.py "Robert Smith"
-
-# Default search (Robert Johnson)
-./venv/bin/python examples/search_entity.py
+python senzing_test.py
 ```
 
-**What it displays:**
-- Entity ID and name
-- Match key and score
-- Number of records and data sources
-- All entity features (ADDRESS, DOB, EMAIL, PHONE, NAME, etc.)
+## How It Works
 
-**Example output:**
-```
-🔍 Searching for entities named 'Robert Smith'...
-
-✅ Found 3 matching entities:
-
-1. Entity ID: 1
-   Name: Robert Smith
-   Match Key: +NAME
-   Match Score: N/A
-   Records: 4 from CUSTOMERS
-   Features:
-      ADDRESS: 1515 Adela Lane Las Vegas NV 89111 (HOME)
-      DOB: 11/12/1978
-      EMAIL: bsmith@work.com
-      PHONE: 702-919-1300 (HOME)
-```
-
-### `get_entity.py`
-
-Get comprehensive details for a specific entity by ID.
-
-**Usage:**
-```bash
-# Get entity by ID
-./venv/bin/python examples/get_entity.py 1
-
-# Default entity (ID 1)
-./venv/bin/python examples/get_entity.py
-```
-
-**What it displays:**
-- Complete entity details in formatted JSON
-- All records that resolved to this entity
-- Features and relationships
-- Match information
-
-## How They Work
-
-These scripts use the MCP Python client to:
+The test client uses the MCP Python SDK to:
 
 1. **Start the MCP server** using `StdioServerParameters`
-2. **Connect** via stdin/stdout
+2. **Connect** via stdin/stdout transport
 3. **Initialize** a client session
 4. **Call tools** exposed by the MCP server
 5. **Parse and display** the JSON results
 
 ## Using in Your Own Code
 
-You can use these as templates for your own MCP client applications:
+You can use this as a template for your own MCP client applications:
 
 ```python
 from mcp import ClientSession, StdioServerParameters
@@ -112,7 +79,7 @@ from mcp.client.stdio import stdio_client
 
 # Configure server
 server_params = StdioServerParameters(
-    command="/path/to/senzing-mcp-server/venv/bin/senzing-mcp",
+    command="senzing-mcp",
     env={
         "SENZING_ENGINE_CONFIGURATION_JSON": config_json,
         "LD_LIBRARY_PATH": ld_library_path
@@ -135,18 +102,31 @@ async with stdio_client(server_params) as (read, write):
 
 ## Available MCP Tools
 
-The server provides these tools you can call:
+The server provides these 7 read-only tools:
 
-1. **search_entities** - Search by attributes
+1. **search_entities** - Search by name, address, phone, email, etc.
 2. **get_entity** - Get entity by ID
-3. **find_relationship_path** - Find path between entities
-4. **find_network** - Discover entity networks
-5. **explain_relationship** - Explain why entities are related
-6. **explain_entity_resolution** - Explain how entity was resolved
-7. **get_stats** - Get engine statistics
-8. **get_config_info** - Get configuration info
+3. **get_source_record** - Get entity by source record ID (e.g., CUSTOMERS:1001)
+4. **find_path** - Find relationship path between entities
+5. **expand_network** - Expand networks of related entities
+6. **explain_why_related** - Explain why two entities are related (WHY analysis)
+7. **explain_how_resolved** - Explain how entity was resolved (HOW analysis)
 
 ## Troubleshooting
+
+**Environment errors:**
+```bash
+# Ensure environment variables are set
+echo $SENZING_ENGINE_CONFIGURATION_JSON
+echo $LD_LIBRARY_PATH
+```
+
+**Server not found:**
+```bash
+# Use absolute path if senzing-mcp not in PATH
+export SENZING_MCP_COMMAND=/path/to/senzing-mcp-server/venv/bin/senzing-mcp
+python senzing_test.py list-tools
+```
 
 **Import errors:**
 ```bash
@@ -154,21 +134,9 @@ The server provides these tools you can call:
 pip install mcp
 ```
 
-**Server not found:**
-```bash
-# Use absolute path to server
-/path/to/senzing-mcp-server/venv/bin/senzing-mcp
-```
-
-**Environment errors:**
-```bash
-# Ensure your .bashrc has Senzing environment variables set
-echo $SENZING_ENGINE_CONFIGURATION_JSON
-```
-
 ## Notes
 
-- These are **test/example scripts** - in production, you'd typically use the MCP server through AI assistants (Claude, ChatGPT, Amazon Q)
-- Each script starts a new MCP server instance
+- This is a **test/example client** - in production, you'd typically use the MCP server through AI assistants (Claude, ChatGPT, Amazon Q)
+- The script starts a new MCP server instance for each command
 - The server automatically handles SDK initialization
-- All scripts require the environment to be properly configured
+- All commands require proper environment configuration

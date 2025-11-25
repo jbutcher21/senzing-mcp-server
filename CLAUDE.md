@@ -43,10 +43,15 @@ senzing-mcp
 
 ### Testing Examples
 ```bash
-# Test scripts are in examples/ directory
-python examples/quick_test.py              # List available tools
-python examples/search_entity.py "Name"    # Search entities
-python examples/get_entity.py 1            # Get entity by ID
+# Unified test client in examples/ directory
+python examples/senzing_test.py list-tools         # List available tools
+python examples/senzing_test.py search "Name"      # Search entities
+python examples/senzing_test.py get 1              # Get entity by ID
+python examples/senzing_test.py get-record CUSTOMERS 1001  # Get by record
+python examples/senzing_test.py find-path 1 2      # Find relationship path
+python examples/senzing_test.py expand 1           # Expand network
+python examples/senzing_test.py why 1 2            # Explain why related
+python examples/senzing_test.py how 1              # Explain how resolved
 ```
 
 ## Architecture
@@ -169,12 +174,9 @@ The AI assistant spawns the MCP server as a subprocess for each session:
 
 The MCP server is designed to be called by AI assistants through their MCP client implementations:
 
-- **Claude Desktop**: Add to `claude_desktop_config.json` with command `senzing-mcp` (local) or path to SSH launcher (remote)
-- **ChatGPT Desktop**: Uses `chatgpt_mcp_config.json` with similar configuration
-- **Amazon Q Developer**: See AMAZON_Q_SETUP.md for VS Code extension setup
-- **Remote Setup**: SSH tunneling approach documented in MAC_SETUP_INSTRUCTIONS.md
-
-Configuration files in repo root show example setups for each platform.
+- **Claude Desktop/Code**: Detailed configuration in README.md
+- **Other AI Assistants**: Generic MCP configuration pattern documented in README.md
+- **Remote Setup**: SSH-based approach documented in `launch_senzing_mcp_ssh.sh` comments
 
 ## Project Structure
 
@@ -184,13 +186,13 @@ senzing-mcp-server/
 │   ├── server.py          # MCP server with 7 tool definitions
 │   ├── sdk_wrapper.py     # Async Senzing SDK wrapper
 │   └── __init__.py
-├── examples/              # Test scripts using MCP client
-│   ├── quick_test.py      # List available tools
-│   ├── search_entity.py   # Search example
-│   └── get_entity.py      # Get entity example
+├── examples/              # Test client for MCP server
+│   ├── senzing_test.py    # Unified CLI for all 7 tools
+│   └── README.md          # Test client documentation
 ├── pyproject.toml         # Python package config
+├── requirements.txt       # Python dependencies
 ├── RESPONSE_FORMATTING.md # Guidelines for presenting HOW/WHY results
-└── *.md                   # Setup docs for different platforms
+└── README.md              # Main documentation
 ```
 
 ## Common Issues
