@@ -18,7 +18,7 @@ This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity r
 ### Installation
 ```bash
 # Clone repository to your server
-git clone https://github.com/yourusername/senzing-mcp-server.git
+git clone https://github.com/jbutcher21/senzing-mcp-server.git
 cd senzing-mcp-server
 
 # Make launch script executable

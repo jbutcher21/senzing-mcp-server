@@ -20,7 +20,7 @@ First, set up the Senzing MCP server on your AWS instance:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/senzing-mcp-server.git
+git clone https://github.com/jbutcher21/senzing-mcp-server.git
 cd senzing-mcp-server
 
 # Make launch script executable

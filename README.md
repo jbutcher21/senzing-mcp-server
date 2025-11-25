@@ -37,7 +37,7 @@ This is a **read-only** MCP server providing 7 tools for entity resolution analy
 
 1. Clone the repository to your server:
 ```bash
-git clone https://github.com/yourusername/senzing-mcp-server.git
+git clone https://github.com/jbutcher21/senzing-mcp-server.git
 cd senzing-mcp-server
 ```
 
