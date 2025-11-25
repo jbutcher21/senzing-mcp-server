@@ -62,7 +62,7 @@ Add the following configuration (adjust paths to match your installation):
 - Update `LD_LIBRARY_PATH` to point to your Senzing library directory
 - Update `PYTHONPATH` to point to your Senzing Python SDK location
 
-**Note**: The launch script runs directly from source without requiring pip installation. All environment variables are set in the MCP configuration above.
+**Note**: Before running, ensure you've installed Python dependencies with `pip install -r requirements.txt` in the senzing-mcp-server directory. The launch script runs directly from source. All environment variables are set in the MCP configuration above.
 
 ### 3. Restart ChatGPT Desktop
 

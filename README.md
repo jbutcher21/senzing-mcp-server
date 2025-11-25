@@ -118,26 +118,40 @@ Add to your Claude Desktop MCP settings file:
 
 ### Example Queries in Claude
 
-Once configured, you can ask Claude:
+Once configured, you can ask Claude natural language questions using any of the 7 read-only tools:
+
+#### Entity Search & Retrieval
 
 ```
 Search for entities with the name "John Smith" and phone "555-1234"
 ```
 
 ```
-Add a customer record with ID "CUST-001" containing name "Jane Doe" and email "jane@example.com"
+Get the full details for entity 1234
 ```
+
+```
+Show me the entity for customer record 1001 in the CUSTOMERS data source
+```
+
+#### Relationship Analysis
 
 ```
 Find the relationship path between entity 100 and entity 200
 ```
 
 ```
-Import records from /path/to/customers.jsonl into the CUSTOMERS data source
+Expand the network of related entities starting from entity 50, up to 2 degrees
+```
+
+#### Entity Resolution Explanations
+
+```
+Explain why entities 100 and 200 are related (or not merged together)
 ```
 
 ```
-Explain why entities 100 and 200 are related
+Show me how entity 1234 was resolved - what records merged and why
 ```
 
 ## Response Formatting Guide

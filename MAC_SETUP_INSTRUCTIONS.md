@@ -167,16 +167,15 @@ The SSH connection may add latency. This is normal for remote MCP servers. Each 
 
 ## Available Tools
 
-Once configured, ChatGPT can use these Senzing tools:
+Once configured, ChatGPT can use these 7 read-only Senzing tools:
 
-1. **search_entities** - Search by name, address, phone, email, DOB
-2. **get_entity** - Get full entity details by ID
-3. **find_relationship_path** - Find connection between entities
-4. **find_network** - Discover related entity networks
-5. **explain_relationship** - Explain why entities are related
-6. **explain_entity_resolution** - Show how entity was resolved
-7. **get_stats** - Get Senzing engine statistics
-8. **get_config_info** - Get configuration info
+1. **search** - Search for entities by attributes (name, address, phone, email, DOB)
+2. **get_entity** - Get comprehensive details for a specific entity by entity ID
+3. **get_source_record** - Look up entity by source record ID (e.g., CUSTOMERS:1001)
+4. **find_relationship_path** - Find the connection path between two entities
+5. **expand_entity_network** - Expand network of related entities to (n) degrees (max 3)
+6. **explain_why_entities_related** - Explain why two entities are related (WHY analysis)
+7. **how_entity_resolved** - Explain how an entity was resolved from records (HOW analysis)
 
 ## Example Queries for ChatGPT
 
@@ -228,4 +227,4 @@ See the main README's "Response Formatting Guide" section for details and exampl
 - MCP server source: `/data/etl/senzing/er/v4beta/senzingMCP/src/senzing_mcp/server.py`
 - Environment setup: Senzing environment variables passed via SSH from MCP config
 
-**Note**: The launch script runs the MCP server directly from source without requiring pip installation. Environment variables are configured in the MCP config on your Mac and passed to the remote server via SSH.
+**Note**: Before running, ensure Python dependencies are installed on the remote server with `pip install -r requirements.txt` in the senzing-mcp-server directory. The launch script runs the MCP server directly from source. Environment variables are configured in the MCP config on your Mac and passed to the remote server via SSH.
