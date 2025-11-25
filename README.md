@@ -232,7 +232,6 @@ senzing-mcp-server/
 ├── launch_senzing_mcp_ssh.sh # Client-side SSH launcher
 ├── senzing_env.sh            # Environment setup helper
 ├── pyproject.toml            # Project configuration
-├── .env.example              # Environment template
 └── README.md                 # This file
 ```
 

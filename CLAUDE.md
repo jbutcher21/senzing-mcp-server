@@ -95,7 +95,7 @@ Optional:
 - `SENZING_INSTANCE_NAME`: Instance name (default: "senzing-mcp-server")
 - `SENZING_LOG_LEVEL`: Verbosity (default: 0)
 
-Example configuration from .env.example:
+Example SENZING_ENGINE_CONFIGURATION_JSON format:
 ```json
 {
   "PIPELINE": {
@@ -181,7 +181,7 @@ Configuration files in repo root show example setups for each platform.
 ```
 senzing-mcp-server/
 ├── src/senzing_mcp/
-│   ├── server.py          # MCP server with 11 tool definitions
+│   ├── server.py          # MCP server with 7 tool definitions
 │   ├── sdk_wrapper.py     # Async Senzing SDK wrapper
 │   └── __init__.py
 ├── examples/              # Test scripts using MCP client
@@ -189,7 +189,6 @@ senzing-mcp-server/
 │   ├── search_entity.py   # Search example
 │   └── get_entity.py      # Get entity example
 ├── pyproject.toml         # Python package config
-├── .env.example           # Environment template
 ├── RESPONSE_FORMATTING.md # Guidelines for presenting HOW/WHY results
 └── *.md                   # Setup docs for different platforms
 ```
