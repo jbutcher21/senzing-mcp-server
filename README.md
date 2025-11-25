@@ -15,15 +15,15 @@ This MCP server exposes Senzing SDK functionality through the Model Context Prot
 This is a **read-only** MCP server providing 7 tools for entity resolution analysis:
 
 ### Entity Search & Retrieval
-- **search**: Search by name, address, phone, email, etc.
+- **search_entities**: Search by name, address, phone, email, etc.
 - **get_entity**: Retrieve detailed entity information by entity ID
 - **get_source_record**: Look up entity by source record ID (e.g., CUSTOMERS:1001)
 
 ### Relationship Analysis
-- **find_relationship_path**: Discover paths between entities
-- **expand_entity_network**: Expand networks of related entities to (n) degrees (max 3)
-- **explain_why_entities_related**: Explain why two entities are related (WHY analysis)
-- **how_entity_resolved**: See how entities were resolved (HOW analysis)
+- **find_path**: Discover paths between entities
+- **expand_network**: Expand networks of related entities to (n) degrees (max 3)
+- **explain_why_related**: Explain why two entities are related (WHY analysis)
+- **explain_how_resolved**: See how entities were resolved (HOW analysis)
 
 ## Installation
 
@@ -161,8 +161,8 @@ For better interpretation of HOW and WHY analysis results, this repository inclu
 ### What It Does
 
 The formatting guide provides instructions for:
-- **HOW Analysis** (`explain_entity_resolution`): Step-by-step entity resolution explanations with merge steps and match drivers
-- **WHY Analysis** (`explain_relationship`): Side-by-side entity comparisons showing confirmations and conflicts
+- **HOW Analysis** (`explain_how_resolved`): Step-by-step entity resolution explanations with merge steps and match drivers
+- **WHY Analysis** (`explain_why_related`): Side-by-side entity comparisons showing confirmations and conflicts
 
 ### How to Use with Your AI Assistant
 
@@ -219,16 +219,6 @@ Step 1: Merged CUSTOMERS:1001 with CUSTOMERS:1002
 
 See `RESPONSE_FORMATTING.md` for complete formatting examples and guidelines.
 
-## File Format for Bulk Import
-
-The `add_records_from_file` tool expects JSONL format (one JSON object per line):
-
-```jsonl
-{"RECORD_ID": "001", "NAME_FULL": "John Smith", "ADDR_FULL": "123 Main St", "PHONE_NUMBER": "555-1234"}
-{"RECORD_ID": "002", "NAME_FULL": "Jane Doe", "EMAIL_ADDRESS": "jane@example.com", "DATE_OF_BIRTH": "1990-01-15"}
-{"RECORD_ID": "003", "NAME_FULL": "Bob Johnson", "PHONE_NUMBER": "555-5678"}
-```
-
 ## Architecture
 
 ```
@@ -249,14 +239,14 @@ senzing-mcp-server/
 ### Key Components
 
 - **server.py**: MCP server implementation using the official `mcp` package
-  - Defines 11 tools for entity resolution operations
+  - Defines 7 tools for entity resolution operations
   - Handles tool calls and routes to SDK wrapper
   - Uses stdio transport for Claude Desktop integration
 
 - **sdk_wrapper.py**: Async wrapper for synchronous Senzing SDK
   - Initializes SDK from environment variables
   - Provides async interface using ThreadPoolExecutor
-  - Handles error translation and bulk operations
+  - Handles error translation
   - Note: Requires Senzing environment to be initialized before import
 
 ## Development
@@ -289,11 +279,6 @@ senzing-mcp
   LD_LIBRARY_PATH=/opt/senzing/lib PYTHONPATH=/opt/senzing/sdk/python \
     python -c "import senzing"
   ```
-
-**Performance Issues with Bulk Import**
-- Adjust `max_workers` parameter (default: 5)
-- Monitor system resources during large imports
-- Consider breaking very large files into smaller batches
 
 ## License
 

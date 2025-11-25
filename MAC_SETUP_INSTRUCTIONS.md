@@ -167,15 +167,7 @@ The SSH connection may add latency. This is normal for remote MCP servers. Each 
 
 ## Available Tools
 
-Once configured, ChatGPT can use these 7 read-only Senzing tools:
-
-1. **search** - Search for entities by attributes (name, address, phone, email, DOB)
-2. **get_entity** - Get comprehensive details for a specific entity by entity ID
-3. **get_source_record** - Look up entity by source record ID (e.g., CUSTOMERS:1001)
-4. **find_relationship_path** - Find the connection path between two entities
-5. **expand_entity_network** - Expand network of related entities to (n) degrees (max 3)
-6. **explain_why_entities_related** - Explain why two entities are related (WHY analysis)
-7. **how_entity_resolved** - Explain how an entity was resolved from records (HOW analysis)
+The Senzing MCP server provides 7 read-only tools for entity search, retrieval, and relationship analysis. See the main [README](README.md#features) for complete tool descriptions.
 
 ## Example Queries for ChatGPT
 

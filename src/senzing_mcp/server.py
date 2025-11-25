@@ -28,7 +28,7 @@ async def list_tools() -> list[Tool]:
     """List all available Senzing tools."""
     return [
         Tool(
-            name="search",
+            name="search_entities",
             description="Search for resolved entities by person/organization attributes. Returns ENTITY_IDs (Senzing's internal identifiers) with match scores. SEARCH STRATEGIES: (1) Start with available attributes - you can search by NAME_FULL, NAME_FIRST/NAME_LAST, PHONE_NUMBER, EMAIL_ADDRESS, ADDR_FULL, or DATE_OF_BIRTH. (2) Combine multiple attributes for better precision - e.g., name + address, or name + date of birth. (3) If search by name alone returns no results or too many results, add additional attributes like address, phone, email, or date of birth to narrow results. (4) You can search with just one attribute or combine many - the more attributes provided, the more precise the match. Use the returned ENTITY_IDs with get_entity for full details.",
             inputSchema={
                 "type": "object",
@@ -83,8 +83,8 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
-            name="find_relationship_path",
-            description="Find how two entities are connected through relationships and shared attributes. Discovers the chain of connections (path) between entity A and entity B, including any intermediate entities that link them. USE CASES: 'How is person X connected to person Y?', 'What's the relationship between these two companies?', 'Show me the connection path between these entities'. RETURNS: The shortest path showing (1) each entity in the connection chain, (2) what they share (common addresses, phone numbers, names, etc.), (3) relationship types at each step. Useful for investigating connections, fraud rings, or business relationships. Requires two ENTITY_IDs - use search to find them first. Set max_degrees to control how many steps to search (default: 3).",
+            name="find_path",
+            description="Find how two entities are connected through relationships and shared attributes. Discovers the chain of connections (path) between entity A and entity B, including any intermediate entities that link them. USE CASES: 'How is person X connected to person Y?', 'What's the relationship between these two companies?', 'Show me the connection path between these entities'. RETURNS: The shortest path showing (1) each entity in the connection chain, (2) what they share (common addresses, phone numbers, names, etc.), (3) relationship types at each step. Useful for investigating connections, fraud rings, or business relationships. Requires two ENTITY_IDs - use search_entities to find them first. Set max_degrees to control how many steps to search (default: 3).",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -106,8 +106,8 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
-            name="expand_entity_network",
-            description="Expand a network of related entities starting from one or more seed entities, discovering all connected entities up to (n) degrees of separation (maximum 3 degrees). USE CASES: Finding fraud rings, mapping family networks, discovering business relationships, identifying connected parties. RETURNS: Network graph showing (1) all entities within the specified degrees, (2) how they're related, (3) shared attributes (addresses, phones, names), (4) relationship strengths. PARAMETERS: entity_ids (one or more starting points), max_degrees (how far to expand, default 2, max 3), build_out_degrees (expansion pattern), max_entities (result limit, default 100). More degrees = larger network but slower. Use 1-2 degrees for focused analysis, 3 degrees for comprehensive mapping. Requires ENTITY_IDs - use search to find them first.",
+            name="expand_network",
+            description="Expand a network of related entities starting from one or more seed entities, discovering all connected entities up to (n) degrees of separation (maximum 3 degrees). USE CASES: Finding fraud rings, mapping family networks, discovering business relationships, identifying connected parties. RETURNS: Network graph showing (1) all entities within the specified degrees, (2) how they're related, (3) shared attributes (addresses, phones, names), (4) relationship strengths. PARAMETERS: entity_ids (one or more starting points), max_degrees (how far to expand, default 2, max 3), build_out_degrees (expansion pattern), max_entities (result limit, default 100). More degrees = larger network but slower. Use 1-2 degrees for focused analysis, 3 degrees for comprehensive mapping. Requires ENTITY_IDs - use search_entities to find them first.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -138,8 +138,8 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
-            name="explain_why_entities_related",
-            description="Explain WHY two entities are or are not related/resolved together using Senzing's scoring analysis. USE CASES: 'Why didn't these two records merge into one entity?', 'What attributes connect these entities?', 'Why are these considered related but not the same?'. RETURNS: Detailed analysis including (1) matching features (names, addresses, phones that match), (2) conflicting features (different values that prevented merge), (3) match scores and confidence levels, (4) feature-level scoring details, (5) resolution rules applied. This is the WHY analysis - explaining Senzing's decision about whether entities should be related, resolved together, or kept separate. Essential for understanding entity resolution decisions and investigating merge/non-merge reasons. Requires two ENTITY_IDs - use search to find them first. For formatting guidelines, see RESPONSE_FORMATTING.md.",
+            name="explain_why_related",
+            description="Explain WHY two entities are or are not related/resolved together using Senzing's scoring analysis. USE CASES: 'Why didn't these two records merge into one entity?', 'What attributes connect these entities?', 'Why are these considered related but not the same?'. RETURNS: Detailed analysis including (1) matching features (names, addresses, phones that match), (2) conflicting features (different values that prevented merge), (3) match scores and confidence levels, (4) feature-level scoring details, (5) resolution rules applied. This is the WHY analysis - explaining Senzing's decision about whether entities should be related, resolved together, or kept separate. Essential for understanding entity resolution decisions and investigating merge/non-merge reasons. Requires two ENTITY_IDs - use search_entities to find them first. For formatting guidelines, see RESPONSE_FORMATTING.md.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -156,8 +156,8 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
-            name="how_entity_resolved",
-            description="Explain HOW an entity was resolved from its source records, showing the step-by-step resolution timeline. USE CASES: 'How did these records merge together?', 'Show me the resolution history', 'What was the sequence of merges?', auditing resolution decisions, understanding entity formation. RETURNS: Complete resolution story including (1) step-by-step merge sequence (which records merged when), (2) match drivers at each step (what attributes caused the merge), (3) all source records involved, (4) features from each record, (5) final resolved entity state. This is the HOW analysis - the chronological story of how individual records were progressively merged into the final entity. Essential for auditing, debugging resolution issues, and understanding entity composition. Requires one ENTITY_ID - use search to find it first. For formatting guidelines, see RESPONSE_FORMATTING.md.",
+            name="explain_how_resolved",
+            description="Explain HOW an entity was resolved from its source records, showing the step-by-step resolution timeline. USE CASES: 'How did these records merge together?', 'Show me the resolution history', 'What was the sequence of merges?', auditing resolution decisions, understanding entity formation. RETURNS: Complete resolution story including (1) step-by-step merge sequence (which records merged when), (2) match drivers at each step (what attributes caused the merge), (3) all source records involved, (4) features from each record, (5) final resolved entity state. This is the HOW analysis - the chronological story of how individual records were progressively merged into the final entity. Essential for auditing, debugging resolution issues, and understanding entity composition. Requires one ENTITY_ID - use search_entities to find it first. For formatting guidelines, see RESPONSE_FORMATTING.md.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -181,7 +181,7 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             await sdk_wrapper.initialize()
 
         # Entity Search and Retrieval
-        if name == "search":
+        if name == "search_entities":
             attributes_dict = arguments.get("attributes", {})
             attributes_json = json.dumps(attributes_dict)
             result = await sdk_wrapper.search_by_attributes(attributes_json)
@@ -259,7 +259,7 @@ Keep organized with clear section headers.
             return [TextContent(type="text", text=formatting_note + result)]
 
         # Relationship Analysis
-        elif name == "find_relationship_path":
+        elif name == "find_path":
             start_id = arguments.get("start_entity_id")
             end_id = arguments.get("end_entity_id")
             max_degrees = arguments.get("max_degrees", 3)
@@ -290,7 +290,7 @@ Alternative: Use table format for complex paths.
 """
             return [TextContent(type="text", text=formatting_note + result)]
 
-        elif name == "expand_entity_network":
+        elif name == "expand_network":
             entity_ids = arguments.get("entity_ids", [])
             max_degrees = arguments.get("max_degrees", 2)
             # Enforce maximum of 3 degrees
@@ -323,7 +323,7 @@ Optional: Include table showing entity connections and relationship types.
 """
             return [TextContent(type="text", text=formatting_note + result)]
 
-        elif name == "explain_why_entities_related":
+        elif name == "explain_why_related":
             entity_id_1 = arguments.get("entity_id_1")
             entity_id_2 = arguments.get("entity_id_2")
             result = await sdk_wrapper.why_entities(entity_id_1, entity_id_2)
@@ -347,7 +347,7 @@ Keep tone professional and concise.
 """
             return [TextContent(type="text", text=formatting_note + result)]
 
-        elif name == "how_entity_resolved":
+        elif name == "explain_how_resolved":
             entity_id = arguments.get("entity_id")
             result = await sdk_wrapper.how_entity_by_entity_id(entity_id)
 

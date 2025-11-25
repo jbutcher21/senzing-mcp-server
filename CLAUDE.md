@@ -9,9 +9,9 @@ This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity r
 **Key Concepts:**
 - **Entity ID**: Senzing's internal identifier (small integers like 1, 2, 3...) assigned after entity resolution
 - **Record ID**: Your source system's identifier (like "1001", "1002") in a specific data source (like "CUSTOMERS")
-- Most tools require Entity IDs. Use `search` or `get_source_record` to find Entity IDs first.
+- Most tools require Entity IDs. Use `search_entities` or `get_source_record` to find Entity IDs first.
 
-**Important**: When interpreting HOW and WHY results from `how_entity_resolved` and `explain_why_entities_related` tools, follow the formatting guidelines in `RESPONSE_FORMATTING.md` for clear, professional presentation of entity resolution explanations.
+**Important**: When interpreting HOW and WHY results from `explain_how_resolved` and `explain_why_related` tools, follow the formatting guidelines in `RESPONSE_FORMATTING.md` for clear, professional presentation of entity resolution explanations.
 
 ## Development Commands
 
@@ -57,8 +57,8 @@ python examples/get_entity.py 1            # Get entity by ID
 - MCP server implementation using the `mcp` package
 - Defines 7 read-only tools exposed to AI assistants
 - Tool categories:
-  - Entity search/retrieval: `search`, `get_entity`, `get_source_record`
-  - Relationship analysis: `find_relationship_path`, `expand_entity_network`, `explain_why_entities_related`, `how_entity_resolved`
+  - Entity search/retrieval: `search_entities`, `get_entity`, `get_source_record`
+  - Relationship analysis: `find_path`, `expand_network`, `explain_why_related`, `explain_how_resolved`
 - Uses stdio transport for Claude Desktop integration
 - All tool calls are routed through `call_tool()` handler
 
