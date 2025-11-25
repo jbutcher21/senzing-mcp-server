@@ -1,14 +1,14 @@
-# ChatGPT Desktop Setup for Remote Senzing MCP Server (Mac)
+# Remote Senzing MCP Server Setup (Mac to Linux via SSH)
 
 ## Overview
 
-This guide configures ChatGPT Desktop on your Mac to connect to the Senzing MCP server running on remote server **192.168.2.111** via SSH.
+This guide configures ChatGPT Desktop on your Mac to connect to the Senzing MCP server running on a remote Linux server via SSH.
 
 ## Prerequisites
 
 - ChatGPT Desktop App installed on your Mac
-- SSH access to 192.168.2.111 as user `jbutcher`
-- SSH key at `~/.ssh/id_rsa` on your Mac
+- SSH access to your remote server as your username
+- SSH key at `~/.ssh/id_rsa` on your Mac (or your preferred SSH key path)
 
 ## Setup Steps
 
@@ -17,7 +17,7 @@ This guide configures ChatGPT Desktop on your Mac to connect to the Senzing MCP 
 Before proceeding, verify you can SSH to the remote server:
 
 ```bash
-ssh -i ~/.ssh/id_rsa jbutcher@192.168.2.111 "echo 'SSH connection works'"
+ssh -i ~/.ssh/id_rsa your-username@remote-server-ip "echo 'SSH connection works'"
 ```
 
 If this fails, you may need to:
@@ -33,7 +33,7 @@ On your **Mac**, create a directory and copy the launch script:
 mkdir -p ~/senzing-mcp
 
 # Copy the SSH launch script from the remote server
-scp jbutcher@192.168.2.111:/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp_ssh.sh \
+scp your-username@remote-server-ip:/path/to/senzing-mcp-server/launch_senzing_mcp_ssh.sh \
     ~/senzing-mcp/
 
 # Make it executable
@@ -53,8 +53,8 @@ cat > ~/Library/Application\ Support/ChatGPT/mcp_config.json << 'EOF'
 {
   "mcpServers": {
     "senzing": {
-      "command": "/Users/jbutcher/senzing-mcp/launch_senzing_mcp_ssh.sh",
-      "description": "Senzing Entity Resolution MCP Server (via SSH to 192.168.2.111)",
+      "command": "/Users/your-username/senzing-mcp/launch_senzing_mcp_ssh.sh",
+      "description": "Senzing Entity Resolution MCP Server (via SSH to remote server)",
       "env": {
         "SENZING_ENGINE_CONFIGURATION_JSON": "{\"PIPELINE\":{\"CONFIGPATH\":\"/etc/opt/senzing\",\"RESOURCEPATH\":\"/opt/senzing/g2/resources\",\"SUPPORTPATH\":\"/opt/senzing/data\"},\"SQL\":{\"CONNECTION\":\"sqlite3://na:na@/var/opt/senzing/sqlite/G2C.db\"}}",
         "LD_LIBRARY_PATH": "/opt/senzing/lib",
@@ -100,8 +100,8 @@ To avoid specifying the SSH key path every time, add this to `~/.ssh/config`:
 
 ```
 Host senzing-server
-    HostName 192.168.2.111
-    User jbutcher
+    HostName remote-server-ip
+    User your-username
     IdentityFile ~/.ssh/id_rsa
     ServerAliveInterval 60
     ServerAliveCountMax 3
@@ -123,8 +123,8 @@ ssh-add -l
 
 ### "Connection refused" or Timeout
 
-- Verify the server is reachable: `ping 192.168.2.111`
-- Check firewall settings on 192.168.2.111
+- Verify the server is reachable: `ping remote-server-ip`
+- Check firewall settings on remote server
 - Ensure SSH is running on the remote server
 
 ### MCP Server Not Appearing in ChatGPT
@@ -214,9 +214,9 @@ See the main README's "Response Formatting Guide" section for details and exampl
 - Launch script: `~/senzing-mcp/launch_senzing_mcp_ssh.sh`
 - ChatGPT config: `~/Library/Application Support/ChatGPT/mcp_config.json`
 
-**On remote server (192.168.2.111):**
-- Remote launch script: `/data/etl/senzing/er/v4beta/senzingMCP/launch_senzing_mcp.sh`
-- MCP server source: `/data/etl/senzing/er/v4beta/senzingMCP/src/senzing_mcp/server.py`
+**On remote server:**
+- Remote launch script: `/path/to/senzing-mcp-server/launch_senzing_mcp.sh`
+- MCP server source: `/path/to/senzing-mcp-server/src/senzing_mcp/server.py`
 - Environment setup: Senzing environment variables passed via SSH from MCP config
 
 **Note**: Before running, ensure Python dependencies are installed on the remote server with `pip install -r requirements.txt` in the senzing-mcp-server directory. The launch script runs the MCP server directly from source. Environment variables are configured in the MCP config on your Mac and passed to the remote server via SSH.

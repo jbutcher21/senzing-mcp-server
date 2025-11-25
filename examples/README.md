@@ -8,7 +8,7 @@ Before running these examples, ensure:
 
 1. The MCP server is installed:
    ```bash
-   cd /data/etl/senzing/er/v4beta/senzingMCP
+   cd /path/to/senzing-mcp-server
    pip install -e .
    ```
 
@@ -112,7 +112,7 @@ from mcp.client.stdio import stdio_client
 
 # Configure server
 server_params = StdioServerParameters(
-    command="/data/etl/senzing/er/v4beta/senzingMCP/venv/bin/senzing-mcp",
+    command="/path/to/senzing-mcp-server/venv/bin/senzing-mcp",
     env={
         "SENZING_ENGINE_CONFIGURATION_JSON": config_json,
         "LD_LIBRARY_PATH": ld_library_path
@@ -157,7 +157,7 @@ pip install mcp
 **Server not found:**
 ```bash
 # Use absolute path to server
-/data/etl/senzing/er/v4beta/senzingMCP/venv/bin/senzing-mcp
+/path/to/senzing-mcp-server/venv/bin/senzing-mcp
 ```
 
 **Environment errors:**
