@@ -15,9 +15,5 @@ senzing-mcp = "senzing_mcp.server:run"
 requires = ["setuptools>=68.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["senzing_mcp"]
-package-dir = {"" = "src"}
-
 [tool.setuptools.packages.find]
 where = ["src"]

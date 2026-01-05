@@ -23,6 +23,29 @@ app = Server("senzing-mcp-server")
 sdk_wrapper = SenzingSDKWrapper()
 
 
+def format_result(result: str, formatting_note: str) -> str:
+    """Check result for errors and format appropriately.
+
+    If the result contains an error, return a prominent error message.
+    Otherwise, return the formatting instructions + result.
+    """
+    try:
+        data = json.loads(result)
+        if isinstance(data, dict) and "error" in data:
+            error_msg = data["error"]
+            return f"""⚠️ SENZING ERROR - DISPLAY THIS TO THE USER ⚠️
+
+The Senzing MCP tool returned an error:
+
+ERROR: {error_msg}
+
+Please inform the user about this error. Do not proceed as if the operation succeeded."""
+    except json.JSONDecodeError:
+        pass
+
+    return formatting_note + result
+
+
 @app.list_tools()
 async def list_tools() -> list[Tool]:
     """List all available Senzing tools."""
@@ -186,7 +209,6 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             attributes_json = json.dumps(attributes_dict)
             result = await sdk_wrapper.search_by_attributes(attributes_json)
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR SEARCH RESULTS]
 Present as clear search results:
 1. Search Summary:
@@ -205,13 +227,12 @@ Present as clear search results:
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         elif name == "get_entity":
             entity_id = arguments.get("entity_id")
             result = await sdk_wrapper.get_entity_by_entity_id(entity_id)
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR ENTITY DETAILS]
 Present as comprehensive entity profile:
 1. Entity Overview:
@@ -231,14 +252,13 @@ Keep organized with clear section headers.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         elif name == "get_source_record":
             data_source = arguments.get("data_source")
             record_id = arguments.get("record_id")
             result = await sdk_wrapper.get_entity_by_record_id(data_source, record_id)
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR SOURCE RECORD LOOKUP]
 Present as entity profile (same format as get_entity):
 1. Start by noting which source record was queried
@@ -256,7 +276,7 @@ Keep organized with clear section headers.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         # Relationship Analysis
         elif name == "find_path":
@@ -267,7 +287,6 @@ Keep organized with clear section headers.
                 start_id, end_id, max_degrees
             )
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR RELATIONSHIP PATH]
 Present as connection path visualization:
 1. Path Summary:
@@ -288,7 +307,7 @@ Alternative: Use table format for complex paths.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         elif name == "expand_network":
             entity_ids = arguments.get("entity_ids", [])
@@ -302,7 +321,6 @@ Alternative: Use table format for complex paths.
                 entity_list_json, max_degrees, build_out, max_entities
             )
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR NETWORK EXPANSION]
 Present as organized network analysis:
 1. Network Summary:
@@ -321,14 +339,13 @@ Optional: Include table showing entity connections and relationship types.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         elif name == "explain_why_related":
             entity_id_1 = arguments.get("entity_id_1")
             entity_id_2 = arguments.get("entity_id_2")
             result = await sdk_wrapper.why_entities(entity_id_1, entity_id_2)
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR WHY ANALYSIS]
 Present as relationship analysis:
 1. Summary:
@@ -345,13 +362,12 @@ Keep tone professional and concise.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         elif name == "explain_how_resolved":
             entity_id = arguments.get("entity_id")
             result = await sdk_wrapper.how_entity_by_entity_id(entity_id)
 
-            # Prepend formatting instructions
             formatting_note = """[FORMATTING INSTRUCTIONS FOR HOW ANALYSIS]
 Present as step-by-step resolution timeline:
 1. Summary: Which records merged, how many steps, match drivers, any conflicts
@@ -366,7 +382,7 @@ Keep tone professional and clear.
 
 [RAW JSON DATA FOLLOWS]
 """
-            return [TextContent(type="text", text=formatting_note + result)]
+            return [TextContent(type="text", text=format_result(result, formatting_note))]
 
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
