@@ -1,5 +1,6 @@
 """Main MCP server implementation for Senzing SDK."""
 
+import argparse
 import asyncio
 import json
 import logging
@@ -11,6 +12,30 @@ from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
 from senzing_mcp.sdk_wrapper import SenzingSDKWrapper
+
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Senzing MCP Server - Entity resolution tools for AI assistants"
+    )
+    parser.add_argument(
+        '--http',
+        action='store_true',
+        help='Use HTTP/SSE transport instead of STDIO (default: STDIO)'
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=8000,
+        help='HTTP server port (default: 8000)'
+    )
+    parser.add_argument(
+        '--host',
+        default='127.0.0.1',
+        help='HTTP server host (default: 127.0.0.1)'
+    )
+    return parser.parse_args()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -392,8 +417,64 @@ Keep tone professional and clear.
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
+async def run_stdio_server():
+    """Run the MCP server with STDIO transport."""
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(
+            read_stream,
+            write_stream,
+            app.create_initialization_options(),
+        )
+
+
+async def run_http_server(host: str, port: int):
+    """Run the MCP server with HTTP/SSE transport."""
+    from mcp.server.sse import SseServerTransport
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.requests import Request
+    import uvicorn
+
+    # Create SSE transport with /messages/ endpoint for client messages
+    sse_transport = SseServerTransport("/messages/")
+
+    async def handle_sse(request: Request):
+        """Handle SSE connection from client."""
+        async with sse_transport.connect_sse(
+            request.scope, request.receive, request._send
+        ) as (read_stream, write_stream):
+            await app.run(
+                read_stream,
+                write_stream,
+                app.create_initialization_options(),
+            )
+
+    # Create Starlette app with SSE routes
+    starlette_app = Starlette(
+        debug=False,
+        routes=[
+            Route("/sse", endpoint=handle_sse),
+            Mount("/messages/", app=sse_transport.handle_post_message),
+        ],
+    )
+
+    logger.info(f"Senzing MCP server (HTTP/SSE) running at http://{host}:{port}/sse")
+    logger.info(f"Clients should connect to: http://{host}:{port}/sse")
+
+    config = uvicorn.Config(
+        starlette_app,
+        host=host,
+        port=port,
+        log_level="info",
+    )
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
 async def main():
     """Main entry point for the MCP server."""
+    args = parse_args()
+
     try:
         logger.info("Starting Senzing MCP server...")
 
@@ -401,13 +482,13 @@ async def main():
         await sdk_wrapper.initialize()
         logger.info("Senzing SDK initialized successfully")
 
-        # Run server
-        async with stdio_server() as (read_stream, write_stream):
-            await app.run(
-                read_stream,
-                write_stream,
-                app.create_initialization_options(),
-            )
+        # Run server with selected transport
+        if args.http:
+            logger.info(f"Using HTTP/SSE transport on {args.host}:{args.port}")
+            await run_http_server(args.host, args.port)
+        else:
+            logger.info("Using STDIO transport")
+            await run_stdio_server()
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

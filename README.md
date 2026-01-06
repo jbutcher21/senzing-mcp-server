@@ -57,21 +57,50 @@ chmod +x launch_senzing_mcp.sh
 
 ### Running the Server
 
-Start the MCP server using the launch script:
-```bash
-./launch_senzing_mcp.sh
-```
+The server supports two transport modes: **STDIO** (default) and **HTTP/SSE**.
 
-Or run directly from source:
+#### STDIO Transport (Default)
+
+STDIO is the default transport where the AI assistant spawns the server as a subprocess:
+
 ```bash
+# Using launch script
+./launch_senzing_mcp.sh
+
+# Or run directly from source
 cd src
 python -m senzing_mcp.server
-```
 
-Or if installed via pip:
-```bash
+# Or if installed via pip
 senzing-mcp
 ```
+
+#### HTTP/SSE Transport
+
+HTTP/SSE runs the server as a long-running process that AI clients connect to via HTTP:
+
+```bash
+# Start HTTP server on default port (8000)
+python -m senzing_mcp.server --http
+
+# Custom port
+python -m senzing_mcp.server --http --port 3000
+
+# Listen on all interfaces (for remote access)
+python -m senzing_mcp.server --http --host 0.0.0.0 --port 8000
+```
+
+The server will display the connection URL:
+```
+Senzing MCP server (HTTP/SSE) running at http://127.0.0.1:8000/sse
+Clients should connect to: http://127.0.0.1:8000/sse
+```
+
+**When to use HTTP/SSE:**
+- Server persists across AI sessions (SDK stays initialized)
+- Multiple AI clients can connect to one server
+- Simpler remote access (no SSH wrapper needed)
+- Better for production deployments
 
 ### Configuration for AI Assistants
 
@@ -116,6 +145,26 @@ Add to your Claude Desktop MCP settings file:
 Claude Code (the CLI tool at claude.ai/code) uses the same MCP configuration as Claude Desktop. Configure in your VS Code settings or `~/.config/claude-code/config.json` with the same format as above.
 
 See [Claude Code MCP documentation](https://docs.claude.com/claude-code) for platform-specific details.
+
+#### HTTP/SSE Configuration (All AI Assistants)
+
+For HTTP/SSE transport, first start the server:
+```bash
+python -m senzing_mcp.server --http --port 8000
+```
+
+Then configure your AI assistant to connect via URL:
+```json
+{
+  "mcpServers": {
+    "senzing": {
+      "url": "http://localhost:8000/sse"
+    }
+  }
+}
+```
+
+**Note**: With HTTP transport, environment variables (`SENZING_ENGINE_CONFIGURATION_JSON`, etc.) must be set where the server runs, not in the AI assistant's config.
 
 #### Other AI Assistants (ChatGPT, Amazon Q, etc.)
 
@@ -270,12 +319,12 @@ senzing-mcp-server/
 - **server.py**: MCP server implementation using the official `mcp` package
   - Defines 7 tools for entity resolution operations
   - Handles tool calls and routes to SDK wrapper
-  - Uses stdio transport for Claude Desktop integration
+  - Supports both STDIO and HTTP/SSE transports (`--http` flag)
 
 - **sdk_wrapper.py**: Async wrapper for synchronous Senzing SDK
   - Initializes SDK from environment variables
   - Provides async interface using ThreadPoolExecutor
-  - Handles error translation
+  - Auto-reinitializes on stale config errors (SENZ2062)
   - Note: Requires Senzing environment to be initialized before import
 
 ## Development

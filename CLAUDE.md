@@ -19,9 +19,14 @@ This is an MCP (Model Context Protocol) server that exposes Senzing SDK entity r
 # Install dependencies
 pip install -r requirements.txt
 
-# Run server directly from source
+# Run server with STDIO transport (default)
 python -m senzing_mcp.server          # From src/ directory
 ./launch_senzing_mcp.sh               # Or use launch script
+
+# Run server with HTTP/SSE transport
+python -m senzing_mcp.server --http                    # Default: localhost:8000
+python -m senzing_mcp.server --http --port 3000        # Custom port
+python -m senzing_mcp.server --http --host 0.0.0.0     # All interfaces
 
 # Debug logging
 export SENZING_LOG_LEVEL=1
@@ -36,6 +41,17 @@ python examples/senzing_test.py expand 1
 python examples/senzing_test.py why 1 2
 python examples/senzing_test.py how 1
 ```
+
+## Transport Options
+
+**STDIO (default)**: AI assistant spawns server as subprocess, communicates via stdin/stdout.
+- Use: `python -m senzing_mcp.server` or `./launch_senzing_mcp.sh`
+- Server lifecycle tied to AI session
+
+**HTTP/SSE**: Server runs independently, AI connects via HTTP.
+- Use: `python -m senzing_mcp.server --http --port 8000`
+- Server URL: `http://localhost:8000/sse`
+- Server persists across AI sessions, SDK stays initialized
 
 ## Architecture
 
